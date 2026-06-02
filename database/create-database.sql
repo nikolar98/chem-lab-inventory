@@ -1,0 +1,1 @@
+CREATE DATABASE chem_lab_inventory;
