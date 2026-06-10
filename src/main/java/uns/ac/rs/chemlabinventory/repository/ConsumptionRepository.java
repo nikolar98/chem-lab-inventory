@@ -3,5 +3,5 @@ package uns.ac.rs.chemlabinventory.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uns.ac.rs.chemlabinventory.model.Consumption;
 
-public interface ConsumptionRepository extends JpaRepository<Consumption, Integer> {
+public interface ConsumptionRepository extends JpaRepository<Consumption, Long> {
 }
