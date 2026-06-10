@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chem Lab Inventory - Prijava</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background:
+                    linear-gradient(rgba(15, 32, 39, 0.82),
+                    rgba(32, 58, 67, 0.82)),
+                    url('https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=2070&auto=format&fit=crop');
+
+            background-size: cover;
+            background-position: center;
+
+            height: 100vh;
+            margin: 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+
+            width: 400px;
+
+            background: rgba(255,255,255,0.97);
+
+            padding: 42px;
+
+            border-radius: 18px;
+
+            box-shadow:
+                    0 10px 35px rgba(0,0,0,0.35);
+
+            backdrop-filter: blur(4px);
+
+            animation: fadeIn 0.7s ease;
+        }
+
+        @keyframes fadeIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+
+            text-align: center;
+            margin-bottom: 10px;
+
+            font-size: 2.2rem;
+            font-weight: 800;
+
+            color: #1f3b4d;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+
+            text-align: center;
+
+            color: #5f6f7a;
+
+            margin-bottom: 35px;
+
+            font-size: 0.95rem;
+        }
+
+        h2 {
+
+            text-align: center;
+
+            margin-bottom: 25px;
+
+            color: #203a43;
+        }
+
+        label {
+
+            display: block;
+
+            margin-bottom: 6px;
+
+            font-weight: 600;
+
+            color: #2f2f2f;
+        }
+
+        input {
+
+            width: 100%;
+
+            padding: 12px;
+
+            margin-bottom: 18px;
+
+            border: 1px solid #cfd8dc;
+
+            border-radius: 10px;
+
+            font-size: 0.95rem;
+
+            transition: 0.2s;
+        }
+
+        input:focus {
+
+            outline: none;
+
+            border-color: #2c5364;
+
+            box-shadow: 0 0 0 3px rgba(44,83,100,0.15);
+        }
+
+        button {
+
+            width: 100%;
+
+            padding: 12px;
+
+            border: none;
+
+            border-radius: 10px;
+
+            background: linear-gradient(135deg, #203a43, #2c5364);
+
+            color: white;
+
+            font-size: 1rem;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.25s;
+        }
+
+        button:hover {
+
+            transform: translateY(-1px);
+
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+        }
+
+        .message {
+
+            text-align: center;
+
+            margin-top: 18px;
+
+            font-weight: 600;
+        }
+
+        .error {
+            color: #d9534f;
+        }
+
+        .success {
+            color: #28a745;
+        }
+
+        .footer {
+
+            margin-top: 28px;
+
+            text-align: center;
+
+            color: #6d6d6d;
+
+            font-size: 0.85rem;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <div class="logo">
+        Hemijska laboratorija
+    </div>
+
+    <div class="subtitle">
+        Sistem za evidenciju hemikalija, laboratorijskih zaliha i potrošnje
+    </div>
+
+    <h2>Prijava korisnika</h2>
+
+    <form id="loginForm" action="/login" method="post">
+
+        <label for="username">
+            Email adresa
+        </label>
+
+        <input type="text"
+               id="username"
+               name="username"
+               placeholder="Unesite email adresu"
+               required>
+
+        <label for="password">
+            Lozinka
+        </label>
+
+        <input type="password"
+               id="password"
+               name="password"
+               placeholder="Unesite lozinku"
+               required>
+
+        <button type="submit">
+            Uloguj se
+        </button>
+
+    </form>
+
+    <div class="message">
+
+        <script>
+
+            if(window.location.search.includes('error')) {
+
+                document.write('<div class="error">Pogrešan email ili lozinka.</div>');
+
+            }
+            else if(window.location.search.includes('logout')) {
+
+                document.write('<div class="success">Uspešno ste se odjavili.</div>');
+            }
+
+        </script>
+
+    </div>
+
+    <div class="footer"> © 2026 PMF | Departman za hemiju, biohemiju i zaštitu životne sredine </div>
+
+    </div>
+
+<script>
+
+    const form = document.getElementById("loginForm");
+
+    form.addEventListener("submit", () => {
+
+        const email = document.getElementById("username").value.trim();
+
+        if(email) {
+
+            sessionStorage.setItem("email", email);
+        }
+    });
+
+</script>
+
+</body>
+</html>
