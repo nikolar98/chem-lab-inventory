@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chem Lab Inventory - Hemikalije</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            color: #203a43;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            padding: 28px 18px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #cfd8dc;
+            margin-bottom: 35px;
+        }
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #eaf4f7;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: 0.25s;
+        }
+
+        .nav a:hover,
+        .nav a.active {
+            background: rgba(0, 188, 212, 0.25);
+        }
+
+        .logout {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 22px;
+        }
+
+        .logout button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.12);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .logout button:hover {
+            background: rgba(255,255,255,0.22);
+        }
+
+        .content {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+        }
+
+        .topbar {
+            background: white;
+            height: 80px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .page-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.04);
+        }
+
+        .status {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .status-blue {
+            background: #e8f2ff;
+            color: #1565d8;
+        }
+
+        .status-yellow {
+            background: #fff3d9;
+            color: #b97700;
+        }
+
+        .status-red {
+            background: #ffe4e4;
+            color: #d63031;
+        }
+
+        .btn-primary-custom {
+            background: #008b95;
+            border: none;
+        }
+
+        .btn-primary-custom:hover {
+            background: #00757e;
+        }
+
+        .danger-date {
+            color: #d63031;
+            font-weight: 600;
+        }
+
+        .table th {
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .action-btn i {
+            font-size: 16px;
+        }
+
+        .alarm-icon {
+            font-size: 18px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">
+        Hemijska<br>laboratorija
+    </div>
+
+    <div class="subtitle">
+        Sistem za evidenciju hemikalija i zaliha
+    </div>
+
+    <nav class="nav">
+        <a href="/home.html" class="active">Početna</a>
+        <a href="/chemicals.html">Hemikalije</a>
+        <a href="/pakovanja.html"> Pakovanja </a>
+        <a href="/potrosnja.html"> Potrošnja </a>
+        <a href="/lokacije.html"> Lokacije </a>
+        <a href="/proizvodjaci.html"> Proizvođači </a>
+        <a href="/korisnici.html"> Korisnici </a>
+        <a href="/izvestaji.html"> Izveštaji </a>
+        <a href="/upozorenja.html"> Upozorenja </a>
+    </nav>
+
+    <form class="logout" action="/logout" method="post">
+        <button type="submit">Odjava</button>
+    </form>
+
+</aside>
+
+<div class="content">
+
+    <div class="topbar d-flex align-items-center justify-content-between px-4">
+
+        <h4 class="mb-0">Hemikalije</h4>
+
+        <div class="d-flex align-items-center gap-3">
+
+            <button class="btn btn-primary-custom text-white">
+                <i class="bi bi-plus-lg"></i>
+                Dodaj hemikaliju
+            </button>
+
+            <div class="text-end">
+                <strong>Dobrodošli</strong><br>
+                <small id="userEmail">admin@test.com</small>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="container-fluid p-4">
+
+        <div class="page-card">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+                    <h2>Lista hemikalija</h2>
+
+                    <p class="text-muted">
+                        Pregled i upravljanje svim hemikalijama u laboratoriji.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-md-4">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Pretraži hemikalije...">
+                </div>
+
+                <div class="col-md-2">
+                    <select class="form-select">
+                        <option>Sve lokacije</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select class="form-select">
+                        <option>Svi statusi</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select class="form-select">
+                        <option>Svi alarmi</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100">
+                        Filter
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                    <tr>
+                        <th>Hemikalija</th>
+                        <th>Proizvođač</th>
+                        <th>Čistoća</th>
+                        <th>Pakovanje</th>
+                        <th>Količina</th>
+                        <th>Trenutno stanje</th>
+                        <th>Lokacija</th>
+                        <th>Zadužena osoba</th>
+                        <th>Rok</th>
+                        <th>Alarmi</th>
+                        <th>Akcije</th>
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    <tr>
+
+                        <td>Hlorna kiselina (HCl)</td>
+                        <td>Merck</td>
+                        <td>37%</td>
+                        <td>Staklena boca 1L</td>
+                        <td>2.50 L</td>
+
+                        <td>
+                            <span class="status status-blue">
+                                Optimalno
+                            </span>
+                        </td>
+
+                        <td>Laboratorija 1</td>
+                        <td>J. Petrović</td>
+
+                        <td class="danger-date">
+                            15.05.2025
+                        </td>
+
+                        <td>
+                            <i class="bi bi-bell-fill text-danger alarm-icon"></i>
+                        </td>
+
+                        <td>
+
+                            <div class="d-flex gap-2 justify-content-center">
+
+                                <button class="btn btn-outline-secondary action-btn">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+
+                                <button class="btn btn-outline-secondary action-btn">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>Natrijum hidroksid (NaOH)</td>
+                        <td>Honeywell</td>
+                        <td>≥98%</td>
+                        <td>500 g</td>
+                        <td>150 g</td>
+
+                        <td>
+                            <span class="status status-yellow">
+                                Nisko
+                            </span>
+                        </td>
+
+                        <td>Laboratorija 1</td>
+                        <td>M. Jovanović</td>
+
+                        <td class="danger-date">
+                            21.05.2025
+                        </td>
+
+                        <td>
+                            <i class="bi bi-bell-fill text-danger alarm-icon"></i>
+                        </td>
+
+                        <td>
+
+                            <div class="d-flex gap-2 justify-content-center">
+
+                                <button class="btn btn-outline-secondary action-btn">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+
+                                <button class="btn btn-outline-secondary action-btn">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>Etanol (C₂H₅OH)</td>
+                        <td>Zorka Pharma</td>
+                        <td>96%</td>
+                        <td>1 L</td>
+                        <td>0.30 L</td>
+
+                        <td>
+                            <span class="status status-red">
+                                Kritično
+                            </span>
+                        </td>
+
+                        <td>Laboratorija 1</td>
+                        <td>J. Petrović</td>
+
+                        <td class="danger-date">
+                            03.06.2025
+                        </td>
+
+                        <td>
+                            <i class="bi bi-bell-fill text-danger alarm-icon"></i>
+                        </td>
+
+                        <td>
+
+                            <div class="d-flex gap-2 justify-content-center">
+
+                                <button class="btn btn-outline-secondary action-btn">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+
+                                <button class="btn btn-outline-secondary action-btn">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const email = sessionStorage.getItem("email");
+
+    if (email) {
+        document.getElementById("userEmail").textContent = email;
+    }
+
+</script>
+
+</body>
+</html>
