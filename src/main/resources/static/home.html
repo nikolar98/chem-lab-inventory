@@ -30,6 +30,8 @@
             top: 0;
             bottom: 0;
             left: 0;
+            overflow-y: auto;
+            flex-shrink: 0;
         }
 
         .logo {
@@ -45,24 +47,28 @@
             margin-bottom: 35px;
         }
 
-        .nav {
+        .sidebar-nav {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+            overflow-y: auto;
+            padding-right: 4px;
         }
 
-        .nav a {
+        .sidebar-nav a {
+            display: block;
             text-decoration: none;
             color: #eaf4f7;
-            padding: 14px 16px;
+            padding: 13px 16px;
             border-radius: 12px;
             font-weight: 600;
             transition: 0.25s;
         }
 
-        .nav a:hover,
-        .nav a.active {
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
             background: rgba(0, 188, 212, 0.25);
+            color: white;
         }
 
         .logout {
@@ -278,7 +284,7 @@
         Sistem za evidenciju hemikalija i zaliha
     </div>
 
-    <nav class="nav">
+    <nav class="sidebar-nav">
         <a href="/home.html" class="active">Početna</a>
         <a href="/chemicals.html">Hemikalije</a>
         <a href="/pakovanja.html"> Pakovanja </a>
@@ -343,23 +349,50 @@
         <h3 class="section-title">Upozorenja</h3>
 
         <div class="cards">
+
             <div class="card warning-red">
-                <h3>Kritično — pri kraju zaliha</h3>
-                <p>Hemikalije koje su pri kraju ili su ispod minimalne zalihe.</p>
-                <button>Pogledaj detalje</button>
+
+                <h3>
+                    Kritično — pri kraju zaliha
+                </h3>
+
+                <p>
+                    7 hemikalija je ispod minimalne količine.
+                    Najkritičnije: Hlorna kiselina (0.25 L).
+                </p>
+
+                <button onclick="window.location.href='/alerts.html'">
+                    Pogledaj detalje
+                </button>
+
             </div>
 
             <div class="card warning-orange">
                 <h3>Nisko — uskoro pri kraju</h3>
-                <p>Hemikalije sa niskim zalihama koje uskoro mogu dostići minimum.</p>
-                <button>Pogledaj detalje</button>
+
+                <p>
+                    15 hemikalija uskoro dostiže minimalnu količinu.
+                    Primer: Natrijum hidroksid — preostalo 50 g.
+                </p>
+
+                <button onclick="window.location.href='/alerts.html'">
+                    Pogledaj detalje
+                </button>
             </div>
 
             <div class="card warning-yellow">
                 <h3>Istekle ili uskoro ističu</h3>
-                <p>Hemikalije kojima je istekao rok ili ističe u narednih 30 dana.</p>
-                <button>Pogledaj detalje</button>
+
+                <p>
+                    9 hemikalija ističe u narednih 30 dana.
+                    Najbliži rok: Sumporna kiselina — 15.05.2025.
+                </p>
+
+                <button onclick="window.location.href='/alerts.html'">
+                    Pogledaj detalje
+                </button>
             </div>
+
         </div>
 
         <h3 class="section-title">Brzi pristup</h3>
