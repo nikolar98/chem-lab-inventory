@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chem Lab Inventory - Početna</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         * {
             box-sizing: border-box;
@@ -185,6 +187,10 @@
             border-radius: 16px;
             padding: 22px;
             box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .card h3 {
@@ -352,14 +358,40 @@
 
             <div class="card warning-red">
 
-                <h3>
-                    Kritično — pri kraju zaliha
-                </h3>
+                <div style="display:flex; align-items:center; gap:18px;">
 
-                <p>
-                    7 hemikalija je ispod minimalne količine.
-                    Najkritičnije: Hlorna kiselina (0.25 L).
-                </p>
+                    <div style="
+            width:60px;
+            height:60px;
+            border-radius:50%;
+            background:#ffe8e8;
+            color:#dc3545;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:28px;
+        ">
+                        ⚠
+                    </div>
+
+                    <div>
+
+                        <h2 style="margin:0; font-size:28px;">
+                            Kritično
+                        </h2>
+
+                        <strong style="font-size:20px; color:#dc3545;">
+                            8 upozorenja
+                        </strong>
+
+                        <p style="margin:6px 0 0;">
+                            8 hemikalija je ispod minimalne količine.
+                            Najkritičnije: Hlorna kiselina (50 ml).
+                        </p>
+
+                    </div>
+
+                </div>
 
                 <button onclick="window.location.href='/alerts.html'">
                     Pogledaj detalje
@@ -368,24 +400,55 @@
             </div>
 
             <div class="card warning-orange">
-                <h3>Nisko — uskoro pri kraju</h3>
 
-                <p>
-                    15 hemikalija uskoro dostiže minimalnu količinu.
-                    Primer: Natrijum hidroksid — preostalo 50 g.
-                </p>
+                <div style="display:flex; align-items:center; gap:18px;">
 
-                <button onclick="window.location.href='/alerts.html'">
+                    <div style="
+            width:60px;
+            height:60px;
+            border-radius:50%;
+            background:#fff0e2;
+            color:#fd7e14;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:28px;
+        ">
+                        ⚠
+                    </div>
+
+                    <div>
+
+                        <h2 style="margin:0; font-size:28px;">
+                            Nisko stanje
+                        </h2>
+
+                        <strong style="font-size:20px; color:#fd7e14;">
+                            15 upozorenja
+                        </strong>
+
+                        <p style="margin:6px 0 0;">
+                            Natrijum hidroksid uskoro dostiže minimalnu količinu.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <button
+                        onclick="window.location.href='/alerts.html'"
+                        style="margin-top:18px;">
                     Pogledaj detalje
                 </button>
+
             </div>
 
             <div class="card warning-yellow">
-                <h3>Istekle ili uskoro ističu</h3>
+                <h3>Rok trajanja — tekuća godina</h3>
 
                 <p>
-                    9 hemikalija ističe u narednih 30 dana.
-                    Najbliži rok: Sumporna kiselina — 15.05.2025.
+                    5 hemikalija ističe u narednih 30 dana.
+                    Najbliži rok: Sumporna kiselina — 05.07.2026.
                 </p>
 
                 <button onclick="window.location.href='/alerts.html'">
