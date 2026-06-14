@@ -36,6 +36,8 @@
             top: 0;
             bottom: 0;
             left: 0;
+            overflow-y: auto;
+            flex-shrink: 0;
         }
 
         .logo {
@@ -51,24 +53,28 @@
             margin-bottom: 35px;
         }
 
-        .nav {
+        .sidebar-nav {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+            overflow-y: auto;
+            padding-right: 4px;
         }
 
-        .nav a {
+        .sidebar-nav a {
+            display: block;
             text-decoration: none;
             color: #eaf4f7;
-            padding: 14px 16px;
+            padding: 13px 16px;
             border-radius: 12px;
             font-weight: 600;
             transition: 0.25s;
         }
 
-        .nav a:hover,
-        .nav a.active {
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
             background: rgba(0, 188, 212, 0.25);
+            color: white;
         }
 
         .logout {
@@ -190,7 +196,7 @@
         Sistem za evidenciju hemikalija i zaliha
     </div>
 
-    <nav class="nav">
+    <nav class="sidebar-nav">
         <a href="/home.html">Početna</a>
         <a href="/chemicals.html" class="active">Hemikalije</a>
         <a href="/pakovanja.html"> Pakovanja </a>
