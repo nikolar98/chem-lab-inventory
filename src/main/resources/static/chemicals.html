@@ -242,6 +242,46 @@
             color: #008b95;
         }
 
+
+        .table-scroll-container {
+            height: calc(100vh - 360px);
+            min-height: 360px;
+            overflow: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        .table-scroll-container .table {
+            min-width: 1700px;
+            margin-bottom: 0;
+        }
+
+        .table-scroll-container thead th {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 5;
+        }
+
+        .table-scroll-container::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+        }
+
+        .table-scroll-container::-webkit-scrollbar-thumb {
+            background: #b0bec5;
+            border-radius: 10px;
+        }
+
+        .table-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #78909c;
+        }
+
+        .table-scroll-container::-webkit-scrollbar-track {
+            background: #eef2f5;
+            border-radius: 10px;
+        }
+
     </style>
 
 </head>
@@ -365,7 +405,7 @@
 
             </div>
 
-            <div class="table-responsive" id="detailsView">
+            <div class="table-scroll-container" id="detailsView">
 
                 <table class="table align-middle">
 
@@ -5457,7 +5497,7 @@
 
 
 
-            <div class="table-responsive" id="summaryView" style="display:none;">
+            <div class="table-scroll-container" id="summaryView" style="display:none;">
 
                 <div class="summary-description">
                     Ovaj tab prikazuje zbirno trenutno stanje za hemikalije iste čistoće, bez obzira na mesto nalaženja i zaduženu osobu.
