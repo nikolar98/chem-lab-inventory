@@ -51,8 +51,6 @@
             font-size: 0.9rem;
             color: #cfd8dc;
             margin-bottom: 35px;
-            line-height: 1.5;
-            letter-spacing: 0.2px;
         }
 
         .sidebar-nav {
@@ -218,6 +216,32 @@
             font-size: 0.95rem;
         }
 
+
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: 0.2s;
+        }
+
+        .sortable:hover {
+            color: #008b95;
+        }
+
+        .sort-icon {
+            margin-left: 6px;
+            font-size: 12px;
+            color: #7b8a92;
+            transition: 0.2s;
+        }
+
+        .sortable.active-sort {
+            color: #008b95;
+        }
+
+        .sortable.active-sort .sort-icon {
+            color: #008b95;
+        }
+
     </style>
 
 </head>
@@ -348,15 +372,15 @@
                     <thead>
 
                     <tr>
-                        <th>Naziv hemikalije</th>
-                        <th>Proizvođač</th>
-                        <th>Čistoća</th>
-                        <th>Pakovanje</th>
-                        <th>Količina</th>
-                        <th>Ukupna količina</th>
-                        <th>Trenutna količina</th>
-                        <th>Lokacija</th>
-                        <th>Zadužena osoba</th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 0, 'text', this)">Naziv hemikalije <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 1, 'text', this)">Proizvođač <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 2, 'text', this)">Čistoća <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 3, 'number', this)">Pakovanje <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 4, 'number', this)">Količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 5, 'number', this)">Ukupna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 6, 'number', this)">Trenutna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 7, 'text', this)">Lokacija <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 8, 'text', this)">Zadužena osoba <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th>Napomena</th>
                         <th>Akcije</th>
                     </tr>
@@ -5443,12 +5467,12 @@
 
                     <thead>
                     <tr>
-                        <th>Naziv hemikalije</th>
-                        <th>Čistoća</th>
-                        <th>Ukupno trenutno stanje</th>
-                        <th>Broj zapisa/pakovanja</th>
-                        <th>Lokacije</th>
-                        <th>Zadužene osobe/projekti</th>
+                        <th class="sortable" onclick="sortTable('summaryTableBody', 0, 'text', this)">Naziv hemikalije <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('summaryTableBody', 1, 'text', this)">Čistoća <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('summaryTableBody', 2, 'number', this)">Ukupno trenutno stanje <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('summaryTableBody', 3, 'number', this)">Broj zapisa/pakovanja <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('summaryTableBody', 4, 'text', this)">Lokacije <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('summaryTableBody', 5, 'text', this)">Zadužene osobe/projekti <i class="bi bi-arrow-down-up sort-icon"></i></th>
                     </tr>
                     </thead>
 
@@ -6780,8 +6804,27 @@
 
             </div>
 
-            <div class="results-info mt-3">
-                Prikazano: <strong id="visibleCount">220</strong> zapisa
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="results-info">
+                    Ukupno: <strong id="visibleCount">0</strong> zapisa
+                </div>
+
+                <div class="d-flex align-items-center gap-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="rowsPerPage" class="text-muted mb-0 small">Prikaži:</label>
+                        <select id="rowsPerPage" class="form-select form-select-sm w-auto" onchange="changeRowsPerPage()">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="all">Sve</option>
+                        </select>
+                    </div>
+
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                        </ul>
+                    </nav>
+                </div>
             </div>
 
         </div>
@@ -6789,11 +6832,8 @@
     </div>
 
 </div>
-
 <script>
-
     const email = sessionStorage.getItem("email");
-
     if (email) {
         document.getElementById("userEmail").textContent = email;
     }
@@ -6808,6 +6848,9 @@
     const locationFilterColumn = document.getElementById("locationFilterColumn");
 
     let currentView = "details";
+    let currentPage = 1;
+    let rowsPerPage = 10;
+    const sortDirections = {};
 
     viewTabs.forEach(tab => {
         tab.addEventListener("click", () => {
@@ -6828,6 +6871,7 @@
                 locationFilterColumn.style.display = "none";
             }
 
+            currentPage = 1;
             applyFilters();
         });
     });
@@ -6838,59 +6882,178 @@
             tab.classList.add("active");
 
             locationSelect.value = tab.dataset.location;
+            currentPage = 1;
             applyFilters();
         });
     });
 
-    searchInput.addEventListener("input", applyFilters);
+    searchInput.addEventListener("input", () => {
+        currentPage = 1;
+        applyFilters();
+    });
+
     locationSelect.addEventListener("change", () => {
         tabs.forEach(t => {
             t.classList.toggle("active", t.dataset.location === locationSelect.value);
         });
-
+        currentPage = 1;
         applyFilters();
     });
+
+    function getSortableNumber(value) {
+        const normalized = value
+            .replace(/<[^>]*>/g, '')
+            .toLowerCase()
+            .trim()
+            .replace(',', '.');
+
+        const match = normalized.match(/-?\d+(\.\d+)?/);
+        let num = match ? parseFloat(match[0]) : 0;
+
+        if (normalized.includes('kg') || /\bl\b/.test(normalized)) {
+            num *= 1000;
+        }
+        else if (normalized.includes('mg')) {
+            num /= 1000;
+        }
+
+        return num;
+    }
+    function updateSortIcons(activeHeader, ascending) {
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.classList.remove('active-sort');
+            const icon = header.querySelector('.sort-icon');
+            if (icon) {
+                icon.className = 'bi bi-arrow-down-up sort-icon';
+            }
+        });
+
+        activeHeader.classList.add('active-sort');
+        const activeIcon = activeHeader.querySelector('.sort-icon');
+        if (activeIcon) {
+            activeIcon.className = ascending
+                ? 'bi bi-arrow-up sort-icon'
+                : 'bi bi-arrow-down sort-icon';
+        }
+    }
+
+    function sortTable(tbodyId, columnIndex, type, headerElement) {
+        const tbody = document.getElementById(tbodyId);
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const sortKey = `${tbodyId}-${columnIndex}`;
+
+        sortDirections[sortKey] = !sortDirections[sortKey];
+        const ascending = sortDirections[sortKey];
+
+        rows.sort((a, b) => {
+            let aValue = a.cells[columnIndex].innerText.trim();
+            let bValue = b.cells[columnIndex].innerText.trim();
+
+            if (type === 'number') {
+                aValue = getSortableNumber(aValue);
+                bValue = getSortableNumber(bValue);
+                return ascending ? aValue - bValue : bValue - aValue;
+            }
+
+            return ascending
+                ? aValue.localeCompare(bValue, 'sr', { sensitivity: 'base' })
+                : bValue.localeCompare(aValue, 'sr', { sensitivity: 'base' });
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+        updateSortIcons(headerElement, ascending);
+
+        currentPage = 1;
+        applyFilters();
+    }
+
+    function changeRowsPerPage() {
+        const val = document.getElementById("rowsPerPage").value;
+        rowsPerPage = val === "all" ? "all" : parseInt(val);
+        currentPage = 1;
+        applyFilters();
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        applyFilters();
+    }
 
     function applyFilters() {
         const selectedLocation = locationSelect.value;
         const searchValue = searchInput.value.toLowerCase().trim();
 
-        let visible = 0;
+        let matchingRows = [];
+        let tbodyId = currentView === "details" ? "chemicalsTableBody" : "summaryTableBody";
 
-        if (currentView === "details") {
-            document.querySelectorAll("#chemicalsTableBody tr").forEach(row => {
+        document.querySelectorAll(`#${tbodyId} tr`).forEach(row => {
+            let matches = false;
+
+            if (currentView === "details") {
                 const rowLocation = row.dataset.location;
-                const rowText = row.textContent.toLowerCase();
+                const matchesLocation = selectedLocation === "all" || rowLocation === selectedLocation;
+                const matchesSearch = !searchValue || row.textContent.toLowerCase().includes(searchValue);
+                matches = matchesLocation && matchesSearch;
+            } else {
+                const matchesSearch = !searchValue || row.textContent.toLowerCase().includes(searchValue);
+                matches = matchesSearch;
+            }
 
-                const matchesLocation =
-                    selectedLocation === "all" || rowLocation === selectedLocation;
+            if (matches) {
+                matchingRows.push(row);
+            } else {
+                row.style.display = "none";
+            }
+        });
 
-                const matchesSearch =
-                    !searchValue || rowText.includes(searchValue);
+        const totalRows = matchingRows.length;
+        document.getElementById("visibleCount").textContent = totalRows;
 
-                if (matchesLocation && matchesSearch) {
-                    row.style.display = "";
-                    visible++;
-                } else {
-                    row.style.display = "none";
-                }
-            });
+        let start = 0;
+        let end = totalRows;
+
+        if (rowsPerPage !== "all") {
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+            start = (currentPage - 1) * rowsPerPage;
+            end = start + rowsPerPage;
+
+            renderPagination(totalPages);
         } else {
-            document.querySelectorAll("#summaryTableBody tr").forEach(row => {
-                const rowText = row.textContent.toLowerCase();
-                const matchesSearch = !searchValue || rowText.includes(searchValue);
-
-                if (matchesSearch) {
-                    row.style.display = "";
-                    visible++;
-                } else {
-                    row.style.display = "none";
-                }
-            });
+            document.getElementById("paginationControls").innerHTML = "";
         }
 
-        document.getElementById("visibleCount").textContent = visible;
+        matchingRows.forEach((row, index) => {
+            if (index >= start && index < end) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
     }
+
+    function renderPagination(totalPages) {
+        const pagination = document.getElementById("paginationControls");
+        pagination.innerHTML = "";
+
+        if (totalPages <= 1) return;
+
+        const prevDisabled = currentPage === 1 ? "disabled" : "";
+        pagination.innerHTML += `<li class="page-item ${prevDisabled}"><a class="page-link text-dark" href="#" onclick="goToPage(${currentPage - 1}); return false;">&laquo;</a></li>`;
+
+        for (let i = 1; i <= totalPages; i++) {
+            const active = currentPage === i ? "active bg-secondary border-secondary text-white" : "text-dark";
+            pagination.innerHTML += `<li class="page-item"><a class="page-link ${active}" href="#" onclick="goToPage(${i}); return false;">${i}</a></li>`;
+        }
+
+        const nextDisabled = currentPage === totalPages ? "disabled" : "";
+        pagination.innerHTML += `<li class="page-item ${nextDisabled}"><a class="page-link text-dark" href="#" onclick="goToPage(${currentPage + 1}); return false;">&raquo;</a></li>`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        applyFilters();
+    });
 
 </script>
 
