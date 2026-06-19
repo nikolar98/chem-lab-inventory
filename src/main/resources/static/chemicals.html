@@ -301,10 +301,7 @@
     <nav class="sidebar-nav">
         <a href="/home.html">Početna</a>
         <a href="/chemicals.html" class="active">Hemikalije</a>
-        <a href="/pakovanja.html">Pakovanja</a>
         <a href="/potrosnja.html">Potrošnja</a>
-        <a href="/lokacije.html">Lokacije</a>
-        <a href="/proizvodjaci.html">Proizvođači</a>
         <a href="/users.html">Korisnici</a>
         <a href="/izvestaji.html">Izveštaji</a>
         <a href="/alerts.html">Upozorenja</a>
@@ -360,8 +357,9 @@
 
 
             <div class="view-tabs">
-                <button class="view-tab active" data-view="details">Detaljna evidencija</button>
-                <button class="view-tab" data-view="summary">TRENUTNO STANJE - ukupna količina hemikalije iste čistoće</button>
+                <button class="view-tab active" data-view="summary">TRENUTNO STANJE - ukupna količina hemikalije iste čistoće</button>
+                <button class="view-tab" data-view="details">Detaljna evidencija</button>
+                <button class="view-tab" data-view="prices">Evidencija cena</button>
             </div>
             <div class="location-tabs" id="locationTabsBlock">
                 <button class="location-tab active" data-location="all">Sve lokacije</button>
@@ -6844,6 +6842,59 @@
 
             </div>
 
+            <div id="pricesView" style="display:none;">
+
+                <div class="summary-description" style="background: #eef6f8; border-left: 5px solid #2c5364; margin-bottom: 18px;">
+                    Ovaj tab prikazuje troškove nabavke za hemikalije u laboratoriji.
+                </div>
+
+                <div class="table-scroll-container">
+
+                    <table class="table align-middle">
+
+                        <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortTable('pricesTableBody', 0, 'text', this)">Naziv hemikalije <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th class="sortable" onclick="sortTable('pricesTableBody', 1, 'number', this)">Veličina pakovanja <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th class="sortable" onclick="sortTable('pricesTableBody', 2, 'number', this)">Cena pakovanja <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th class="sortable" onclick="sortTable('pricesTableBody', 3, 'number', this)">Broj pakovanja <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th class="sortable" onclick="sortTable('pricesTableBody', 4, 'number', this)">Ukupna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th class="sortable" onclick="sortTable('pricesTableBody', 5, 'number', this)">Ukupna cena <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                            <th class="sortable" onclick="sortTable('pricesTableBody', 6, 'text', this)">Datum kupovine <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="pricesTableBody">
+                        <tr>
+                            <td>Anilin</td>
+                            <td data-size="1" data-unit="L">1 L</td>
+                            <td data-price="1500">1.500 RSD</td>
+                            <td data-count="2">2</td>
+
+                            <td class="auto-qty"></td>
+                            <td class="auto-total"></td>
+
+                            <td>15.05.2026.</td>
+                        </tr>
+                        <tr>
+                            <td>Azotna kiselina</td>
+                            <td data-size="2.5" data-unit="L">2.5 L</td>
+                            <td data-price="2200">2.200 RSD</td>
+                            <td data-count="5">5</td>
+
+                            <td class="auto-qty"></td>
+                            <td class="auto-total"></td>
+
+                            <td>10.04.2026.</td>
+                        </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
             <div class="d-flex justify-content-between align-items-center mt-4">
                 <div class="results-info">
                     Ukupno: <strong id="visibleCount">0</strong> zapisa
@@ -6884,10 +6935,11 @@
     const searchInput = document.getElementById("searchInput");
     const detailsView = document.getElementById("detailsView");
     const summaryView = document.getElementById("summaryView");
+    const pricesView = document.getElementById("pricesView");
     const locationTabsBlock = document.getElementById("locationTabsBlock");
     const locationFilterColumn = document.getElementById("locationFilterColumn");
 
-    let currentView = "details";
+    let currentView = "summary";
     let currentPage = 1;
     let rowsPerPage = 10;
     const sortDirections = {};
@@ -6899,14 +6951,20 @@
 
             currentView = tab.dataset.view;
 
+            detailsView.style.display = "none";
+            summaryView.style.display = "none";
+            if (pricesView) pricesView.style.display = "none";
+
             if (currentView === "details") {
                 detailsView.style.display = "";
-                summaryView.style.display = "none";
                 locationTabsBlock.style.display = "flex";
                 locationFilterColumn.style.display = "block";
-            } else {
-                detailsView.style.display = "none";
+            } else if (currentView === "summary") {
                 summaryView.style.display = "";
+                locationTabsBlock.style.display = "none";
+                locationFilterColumn.style.display = "none";
+            } else if (currentView === "prices") {
+                if (pricesView) pricesView.style.display = "";
                 locationTabsBlock.style.display = "none";
                 locationFilterColumn.style.display = "none";
             }
@@ -7007,6 +7065,37 @@
         applyFilters();
     }
 
+    function calculatePriceTable() {
+        const rows = document.querySelectorAll("#pricesTableBody tr");
+
+        rows.forEach(row => {
+            const sizeTd = row.cells[1];
+            const priceTd = row.cells[2];
+            const countTd = row.cells[3];
+
+            const qtyTd = row.querySelector(".auto-qty");
+            const totalTd = row.querySelector(".auto-total");
+
+            if (sizeTd && priceTd && countTd) {
+                const size = parseFloat(sizeTd.dataset.size) || 0;
+                const unit = sizeTd.dataset.unit || "";
+                const price = parseFloat(priceTd.dataset.price) || 0;
+                const count = parseInt(countTd.dataset.count) || 0;
+                const calculatedQty = size * count;
+                const calculatedTotal = price * count;
+                if (qtyTd) {
+                    const formattedQty = Number(calculatedQty.toFixed(2));
+                    qtyTd.innerHTML = `<strong>${formattedQty} ${unit}</strong>`;
+                }
+
+                if (totalTd) {
+                    const formattedPrice = calculatedTotal.toLocaleString('sr-RS');
+                    totalTd.innerHTML = `<strong>${formattedPrice} RSD</strong>`;
+                }
+            }
+        });
+    }
+
     function changeRowsPerPage() {
         const val = document.getElementById("rowsPerPage").value;
         rowsPerPage = val === "all" ? "all" : parseInt(val);
@@ -7024,9 +7113,18 @@
         const searchValue = searchInput.value.toLowerCase().trim();
 
         let matchingRows = [];
-        let tbodyId = currentView === "details" ? "chemicalsTableBody" : "summaryTableBody";
 
-        document.querySelectorAll(`#${tbodyId} tr`).forEach(row => {
+        let tbodyId = "summaryTableBody";
+        if (currentView === "details") {
+            tbodyId = "chemicalsTableBody";
+        } else if (currentView === "prices") {
+            tbodyId = "pricesTableBody";
+        }
+
+        const tbodyElement = document.getElementById(tbodyId);
+        if (!tbodyElement) return;
+
+        tbodyElement.querySelectorAll('tr').forEach(row => {
             let matches = false;
 
             if (currentView === "details") {
@@ -7035,6 +7133,7 @@
                 const matchesSearch = !searchValue || row.textContent.toLowerCase().includes(searchValue);
                 matches = matchesLocation && matchesSearch;
             } else {
+                // Za 'summary' i 'prices' pretraga radi samo preko kucanog teksta u input polju
                 const matchesSearch = !searchValue || row.textContent.toLowerCase().includes(searchValue);
                 matches = matchesSearch;
             }
@@ -7092,7 +7191,15 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        applyFilters();
+        calculatePriceTable();
+
+        const activeTab = document.querySelector(".view-tab.active");
+
+        if (activeTab) {
+            activeTab.click();
+        } else {
+            applyFilters();
+        }
     });
 
 </script>
