@@ -6,7 +6,6 @@
     <title>Chem Lab Inventory - Registracija</title>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -20,7 +19,6 @@
 
             background-size: cover;
             background-position: center;
-
             height: 100vh;
             margin: 0;
 
@@ -30,25 +28,16 @@
         }
 
         .register-container {
-
             width: 420px;
-
             background: rgba(255,255,255,0.97);
-
             padding: 42px;
-
             border-radius: 18px;
-
-            box-shadow:
-                    0 10px 35px rgba(0,0,0,0.35);
-
+            box-shadow: 0 10px 35px rgba(0,0,0,0.35);
             backdrop-filter: blur(4px);
-
             animation: fadeIn 0.7s ease;
         }
 
         @keyframes fadeIn {
-
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -61,110 +50,71 @@
         }
 
         .logo {
-
             text-align: center;
             margin-bottom: 10px;
-
             font-size: 2.2rem;
             font-weight: 800;
-
             color: #1f3b4d;
             letter-spacing: 1px;
         }
 
         .subtitle {
-
             text-align: center;
-
             color: #5f6f7a;
-
             margin-bottom: 35px;
-
             font-size: 0.95rem;
         }
 
         h2 {
-
             text-align: center;
-
             margin-bottom: 25px;
-
             color: #203a43;
         }
 
         label {
-
             display: block;
-
             margin-bottom: 6px;
-
             font-weight: 600;
-
             color: #2f2f2f;
         }
 
         input {
-
             width: 100%;
-
             padding: 12px;
-
             margin-bottom: 18px;
-
             border: 1px solid #cfd8dc;
-
             border-radius: 10px;
-
             font-size: 0.95rem;
-
             transition: 0.2s;
         }
 
         input:focus {
-
             outline: none;
-
             border-color: #2c5364;
-
             box-shadow: 0 0 0 3px rgba(44,83,100,0.15);
         }
 
         button {
-
             width: 100%;
-
             padding: 12px;
-
             border: none;
-
             border-radius: 10px;
-
             background: linear-gradient(135deg, #203a43, #2c5364);
-
             color: white;
-
             font-size: 1rem;
-
             font-weight: 700;
-
             cursor: pointer;
-
             transition: 0.25s;
         }
 
         button:hover {
-
             transform: translateY(-1px);
-
             box-shadow: 0 5px 15px rgba(0,0,0,0.25);
         }
 
         .message {
-
             text-align: center;
-
             margin-top: 18px;
-
             font-weight: 600;
         }
 
@@ -177,41 +127,29 @@
         }
 
         .footer {
-
             margin-top: 28px;
-
             text-align: center;
-
             color: #6d6d6d;
-
             font-size: 0.85rem;
         }
 
         .login-link {
-
             margin-top: 20px;
-
             text-align: center;
-
             font-size: 0.95rem;
         }
 
         .login-link a {
-
             color: #203a43;
-
             text-decoration: none;
-
             font-weight: 600;
         }
 
         .login-link a:hover {
-
             text-decoration: underline;
         }
 
     </style>
-
 </head>
 
 <body>
@@ -261,26 +199,35 @@
                required>
 
         <button type="submit">
-            Registruj se
+            Pošalji zahtev za registraciju
         </button>
 
     </form>
 
     <div class="message">
-
         <script>
 
             if(window.location.search.includes('success')) {
 
-                document.write('<div class="success">Uspešno ste se registrovali.</div>');
+                document.write(`
+                <div class="success">
+                    Zahtev za registraciju je uspešno poslat.<br>
+                    Administrator treba da pregleda i odobri Vaš nalog.<br>
+                    Bićete preusmereni na stranicu za prijavu...
+                </div>
+            `);
+
+                setTimeout(() => {
+                    window.location.href = "/login.html";
+                }, 8000);
+
             }
             else if(window.location.search.includes('error')) {
 
-                document.write('<div class="error">Registracija nije uspela.</div>');
+                document.write('<div class="error">Slanje zahteva za registraciju nije uspelo.</div>');
             }
 
         </script>
-
     </div>
 
     <div class="login-link">
@@ -293,22 +240,6 @@
     </div>
 
 </div>
-
-<script>
-
-    const form = document.getElementById("registerForm");
-
-    form.addEventListener("submit", () => {
-
-        const email = document.getElementById("email").value.trim();
-
-        if(email) {
-
-            sessionStorage.setItem("email", email);
-        }
-    });
-
-</script>
 
 </body>
 </html>

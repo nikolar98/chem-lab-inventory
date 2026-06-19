@@ -11,7 +11,6 @@
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -131,8 +130,10 @@
             font-size: 0.95rem;
         }
 
+        .admin-only {
+            display: none;
+        }
     </style>
-
 </head>
 
 <body>
@@ -151,10 +152,10 @@
         <a href="/home.html">Početna</a>
         <a href="/chemicals.html">Hemikalije</a>
         <a href="/potrosnja.html"> Potrošnja </a>
-        <a href="/users.html"> Korisnici </a>
+        <a href="/users.html" class="admin-only"> Korisnici </a>
         <a href="/izvestaji.html"> Izveštaji </a>
         <a href="/alerts.html"> Upozorenja </a>
-        <a href="/requests.html" class="active">Zahtevi</a>
+        <a href="/requests.html" class="admin-only">Zahtevi</a>
     </nav>
 
     <form class="logout" action="/logout" method="post">
@@ -183,13 +184,11 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
 
                 <div>
-
                     <h2>Lista zahteva</h2>
 
                     <p class="text-muted">
                         Pregled svih zahteva koji čekaju odobrenje.
                     </p>
-
                 </div>
 
             </div>
@@ -199,7 +198,6 @@
                 <table class="table align-middle">
 
                     <thead>
-
                     <tr>
                         <th>Tip zahteva</th>
                         <th>Korisnik</th>
@@ -207,171 +205,9 @@
                         <th>Komentar / Napomena</th>
                         <th>Akcije</th>
                     </tr>
-
                     </thead>
 
-                    <tbody>
-
-                    <tr>
-
-                        <td>Dodavanje hemikalije</td>
-
-                        <td>Marko Marković</td>
-
-                        <td>19.06.2026 10:15</td>
-
-                        <td>
-                            Potrebno dodati novu seriju acetona za laboratoriju 1.
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex gap-2">
-
-                                <button class="btn btn-success">
-                                    <i class="bi bi-check-circle"></i>
-                                    Prihvati
-                                </button>
-
-                                <button class="btn btn-danger">
-                                    <i class="bi bi-x-circle"></i>
-                                    Odbij
-                                </button>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Izmena količine zaliha</td>
-
-                        <td>Ana Petrović</td>
-
-                        <td>19.06.2026 11:02</td>
-
-                        <td>
-                            Ažuriranje nakon izvršenog popisa skladišta.
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex gap-2">
-
-                                <button class="btn btn-success">
-                                    <i class="bi bi-check-circle"></i>
-                                    Prihvati
-                                </button>
-
-                                <button class="btn btn-danger">
-                                    <i class="bi bi-x-circle"></i>
-                                    Odbij
-                                </button>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Brisanje hemikalije</td>
-
-                        <td>Jovana Nikolić</td>
-
-                        <td>19.06.2026 12:48</td>
-
-                        <td>
-                            Hemikalija je potrošena i više nije dostupna.
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex gap-2">
-
-                                <button class="btn btn-success">
-                                    <i class="bi bi-check-circle"></i>
-                                    Prihvati
-                                </button>
-
-                                <button class="btn btn-danger">
-                                    <i class="bi bi-x-circle"></i>
-                                    Odbij
-                                </button>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Zahtev za nabavku reagensa</td>
-
-                        <td>Nikola Jovanović</td>
-
-                        <td>19.06.2026 14:20</td>
-
-                        <td>
-                            Potrebno obezbediti dodatnih 500 ml etanola.
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex gap-2">
-
-                                <button class="btn btn-success">
-                                    <i class="bi bi-check-circle"></i>
-                                    Prihvati
-                                </button>
-
-                                <button class="btn btn-danger">
-                                    <i class="bi bi-x-circle"></i>
-                                    Odbij
-                                </button>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>Registracija novog korisnika</td>
-
-                        <td>Milica Stanković</td>
-
-                        <td>19.06.2026 15:41</td>
-
-                        <td>
-                            Novi istraživač na projektu iz biohemije.
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex gap-2">
-
-                                <button class="btn btn-success">
-                                    <i class="bi bi-check-circle"></i>
-                                    Prihvati
-                                </button>
-
-                                <button class="btn btn-danger">
-                                    <i class="bi bi-x-circle"></i>
-                                    Odbij
-                                </button>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
+                    <tbody id="requestsTableBody">
                     </tbody>
 
                 </table>
@@ -383,6 +219,189 @@
     </div>
 
 </div>
+
+<script>
+    const email = sessionStorage.getItem("email");
+
+    if (email) {
+        document.getElementById("userEmail").textContent = email;
+    }
+
+    fetch("/api/requests")
+        .then(response => response.json())
+        .then(requests => {
+            const tbody = document.getElementById("requestsTableBody");
+
+            tbody.innerHTML = "";
+
+            if (requests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">
+                            Trenutno nema zahteva za prikaz.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            requests.forEach(request => {
+                const createdAt = request.createdAt
+                    ? request.createdAt.replace("T", " ").substring(0, 16)
+                    : "—";
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${formatRequestType(request.type)}</td>
+
+                        <td>
+                            ${request.fullName || "—"}<br>
+                            <small class="text-muted">${request.email || ""}</small>
+                        </td>
+
+                        <td>${createdAt}</td>
+
+                        <td>${request.comment || "—"}</td>
+
+                        <td id="actions-${request.id}">
+                            ${renderActions(request)}
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+
+    function renderActions(request) {
+        if (request.status === "APPROVED") {
+            return `
+                <div style="
+                    background:#d1e7dd;
+                    color:#0f5132;
+                    padding:10px 14px;
+                    border-radius:8px;
+                    font-weight:600;
+                    text-align:center;
+                ">
+                    Nalog je uspešno kreiran
+                </div>
+            `;
+        }
+
+        if (request.status === "REJECTED") {
+            return `
+                <div style="
+                    background:#f8d7da;
+                    color:#842029;
+                    padding:10px 14px;
+                    border-radius:8px;
+                    font-weight:600;
+                    text-align:center;
+                ">
+                    Zahtev je odbijen
+                </div>
+            `;
+        }
+
+        return `
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" onclick="approveRequest(${request.id})">
+                    <i class="bi bi-check-circle"></i>
+                    Prihvati
+                </button>
+
+                <button class="btn btn-danger" onclick="rejectRequest(${request.id})">
+                    <i class="bi bi-x-circle"></i>
+                    Odbij
+                </button>
+            </div>
+        `;
+    }
+
+    function approveRequest(id) {
+        fetch(`/api/requests/${id}/approve`, {
+            method: "POST"
+        })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById(`actions-${id}`).innerHTML = `
+                        <div style="
+                            background:#d1e7dd;
+                            color:#0f5132;
+                            padding:10px 14px;
+                            border-radius:8px;
+                            font-weight:600;
+                            text-align:center;
+                        ">
+                            Nalog je uspešno kreiran
+                        </div>
+                    `;
+                } else {
+                    alert("Greška prilikom kreiranja naloga.");
+                }
+            });
+    }
+
+    function rejectRequest(id) {
+        fetch(`/api/requests/${id}/reject`, {
+            method: "POST"
+        })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById(`actions-${id}`).innerHTML = `
+                        <div style="
+                            background:#f8d7da;
+                            color:#842029;
+                            padding:10px 14px;
+                            border-radius:8px;
+                            font-weight:600;
+                            text-align:center;
+                        ">
+                            Zahtev je odbijen
+                        </div>
+                    `;
+                } else {
+                    alert("Greška prilikom odbijanja zahteva.");
+                }
+            });
+    }
+
+    function formatRequestType(type) {
+        if (type === "ACCOUNT_REGISTRATION") {
+            return "Registracija novog korisnika";
+        }
+
+        if (type === "ADD_CHEMICAL") {
+            return "Dodavanje hemikalije";
+        }
+
+        if (type === "EDIT_CHEMICAL") {
+            return "Izmena hemikalije";
+        }
+
+        if (type === "DELETE_CHEMICAL") {
+            return "Brisanje hemikalije";
+        }
+
+        if (type === "UPDATE_STOCK") {
+            return "Izmena količine zaliha";
+        }
+
+        return type;
+    }
+
+    fetch("/api/current-user")
+        .then(response => response.json())
+        .then(user => {
+            document.getElementById("userEmail").textContent = user.email;
+
+            if (user.role === "ADMIN") {
+                document.querySelectorAll(".admin-only").forEach(element => {
+                    element.style.display = "block";
+                });
+            }
+        });
+
+</script>
 
 </body>
 </html>

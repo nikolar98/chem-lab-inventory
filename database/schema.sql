@@ -97,3 +97,21 @@ CREATE TABLE consumptions (
     CONSTRAINT fk_consumption_user
         FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+---- za sprint 2 ----
+
+CREATE TABLE requests (
+                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+                          type VARCHAR(50) NOT NULL,
+                          status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+
+                          full_name VARCHAR(200),
+                          email VARCHAR(150),
+                          password VARCHAR(255),
+
+                          comment VARCHAR(500),
+
+                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

@@ -1,6 +1,7 @@
 package uns.ac.rs.chemlabinventory.controller;
 
 import org.springframework.web.bind.annotation.*;
+import uns.ac.rs.chemlabinventory.dto.ChemicalBatchDTO;
 import uns.ac.rs.chemlabinventory.model.ChemicalBatch;
 import uns.ac.rs.chemlabinventory.service.ChemicalBatchService;
 
@@ -17,7 +18,7 @@ public class ChemicalBatchController {
     }
 
     @GetMapping
-    public List<ChemicalBatch> findAll() {
+    public List<ChemicalBatchDTO> getAllChemicalBatches() {
         return chemicalBatchService.findAll();
     }
 
@@ -32,7 +33,8 @@ public class ChemicalBatchController {
     }
 
     @PutMapping("/{id}")
-    public ChemicalBatch update(@PathVariable Long id, @RequestBody ChemicalBatch chemicalBatch) {
+    public ChemicalBatch update(@PathVariable Long id,
+                                @RequestBody ChemicalBatch chemicalBatch) {
         chemicalBatch.setId(id);
         return chemicalBatchService.save(chemicalBatch);
     }
