@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chem Lab Inventory - Prijava</title>
+    <title>Chem Lab Inventory - Registracija</title>
 
     <style>
 
@@ -29,9 +29,9 @@
             align-items: center;
         }
 
-        .login-container {
+        .register-container {
 
-            width: 400px;
+            width: 420px;
 
             background: rgba(255,255,255,0.97);
 
@@ -187,7 +187,7 @@
             font-size: 0.85rem;
         }
 
-        .register-link {
+        .login-link {
 
             margin-top: 20px;
 
@@ -196,7 +196,7 @@
             font-size: 0.95rem;
         }
 
-        .register-link a {
+        .login-link a {
 
             color: #203a43;
 
@@ -205,7 +205,7 @@
             font-weight: 600;
         }
 
-        .register-link a:hover {
+        .login-link a:hover {
 
             text-decoration: underline;
         }
@@ -216,7 +216,7 @@
 
 <body>
 
-<div class="login-container">
+<div class="register-container">
 
     <div class="logo">
         Hemijska laboratorija
@@ -226,17 +226,27 @@
         Sistem za evidenciju hemikalija, laboratorijskih zaliha i potrošnje
     </div>
 
-    <h2>Prijava korisnika</h2>
+    <h2>Registracija korisnika</h2>
 
-    <form id="loginForm" action="/login" method="post">
+    <form id="registerForm" action="/register" method="post">
 
-        <label for="username">
-            Email adresa
+        <label for="fullName">
+            Ime i prezime
         </label>
 
         <input type="text"
-               id="username"
-               name="username"
+               id="fullName"
+               name="fullName"
+               placeholder="Unesite ime i prezime"
+               required>
+
+        <label for="email">
+            Email adresa
+        </label>
+
+        <input type="email"
+               id="email"
+               name="email"
                placeholder="Unesite email adresu"
                required>
 
@@ -251,7 +261,7 @@
                required>
 
         <button type="submit">
-            Uloguj se
+            Registruj se
         </button>
 
     </form>
@@ -260,36 +270,37 @@
 
         <script>
 
-            if(window.location.search.includes('error')) {
+            if(window.location.search.includes('success')) {
 
-                document.write('<div class="error">Pogrešan email ili lozinka.</div>');
-
+                document.write('<div class="success">Uspešno ste se registrovali.</div>');
             }
-            else if(window.location.search.includes('logout')) {
+            else if(window.location.search.includes('error')) {
 
-                document.write('<div class="success">Uspešno ste se odjavili.</div>');
+                document.write('<div class="error">Registracija nije uspela.</div>');
             }
 
         </script>
 
     </div>
 
-    <div class="register-link">
-        Nemate kreiran nalog?
-        <a href="/register.html">Registrujte se</a>
+    <div class="login-link">
+        Već imate nalog?
+        <a href="/login.html">Prijavite se</a>
     </div>
 
-    <div class="footer"> © 2026 PMF | Departman za hemiju, biohemiju i zaštitu životne sredine </div>
-
+    <div class="footer">
+        © 2026 PMF | Departman za hemiju, biohemiju i zaštitu životne sredine
     </div>
+
+</div>
 
 <script>
 
-    const form = document.getElementById("loginForm");
+    const form = document.getElementById("registerForm");
 
     form.addEventListener("submit", () => {
 
-        const email = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
 
         if(email) {
 
