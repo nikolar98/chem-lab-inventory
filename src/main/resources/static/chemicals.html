@@ -359,7 +359,7 @@
             </div>
 
             <div class="summary-description" id="summaryDescription">
-                Prikazuje ukupnu količinu hemikalije iste čistoće, bez obzira na lokaciju, proizvođača i zaduženu osobu.
+                Prikazuje trenutnu količinu hemikalije iste čistoće, bez obzira na lokaciju, proizvođača i zaduženu osobu.
             </div>
 
             <div class="location-tabs" id="locationTabsBlock">
@@ -419,10 +419,7 @@
                     <tr>
                         <th class="sortable" onclick="sortTable('summaryTableBody', 0, 'text', this)">Naziv hemikalije <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('summaryTableBody', 1, 'text', this)">Čistoća <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th class="sortable" onclick="sortTable('summaryTableBody', 2, 'number', this)">Ukupna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th class="sortable" onclick="sortTable('summaryTableBody', 3, 'number', this)">Trenutna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th>Jedinica</th>
-                        <th>Broj pakovanja</th>
+                        <th class="sortable" onclick="sortTable('summaryTableBody', 2, 'number', this)">Trenutna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
                     </tr>
                     </thead>
                     <tbody id="summaryTableBody"></tbody>
@@ -457,9 +454,14 @@
                         <th class="sortable" onclick="sortTable('pricesTableBody', 0, 'text', this)">Naziv hemikalije <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('pricesTableBody', 1, 'text', this)">Proizvođač <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('pricesTableBody', 2, 'text', this)">Čistoća <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th>Pakovanje</th>
-                        <th>Lokacija</th>
-                        <th>Cena</th>
+                        <th class="sortable" onclick="sortTable('pricesTableBody', 3, 'number', this)">Pakovanje <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('pricesTableBody', 4, 'number', this)">Količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('pricesTableBody', 5, 'number', this)">Ukupna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('pricesTableBody', 6, 'text', this)">Lokacija <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('pricesTableBody', 7, 'text', this)">Zadužena osoba <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('pricesTableBody', 8, 'number', this)">Cena po pakovanju <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('pricesTableBody', 9, 'number', this)">Ukupna cena <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th>Napomena</th>
                     </tr>
                     </thead>
                     <tbody id="pricesTableBody"></tbody>
@@ -622,23 +624,20 @@
         const grouped = new Map();
 
         batches.forEach(batch => {
-            const key = `${batch.chemicalName || "—"}|${batch.purity || "—"}|${batch.packageUnit || ""}`;
+            const unit = normalizeUnit(batch.packageUnit);
+            const key = `${batch.chemicalName || "—"}|${batch.purity || "—"}|${unit}`;
 
             if (!grouped.has(key)) {
                 grouped.set(key, {
                     chemicalName: batch.chemicalName || "—",
                     purity: batch.purity || "—",
-                    unit: batch.packageUnit || "",
-                    totalQuantity: 0,
-                    currentQuantity: 0,
-                    count: 0
+                    unit: unit,
+                    currentQuantity: 0
                 });
             }
 
             const item = grouped.get(key);
-            item.totalQuantity += Number(batch.totalQuantity || 0);
             item.currentQuantity += Number(batch.currentQuantity || 0);
-            item.count += 1;
         });
 
         tbody.innerHTML = "";
@@ -648,10 +647,7 @@
                 <tr data-status="optimalno">
                     <td>${item.chemicalName}</td>
                     <td>${item.purity}</td>
-                    <td><strong>${formatNumber(item.totalQuantity)}</strong></td>
-                    <td><strong>${formatNumber(item.currentQuantity)}</strong></td>
-                    <td>${item.unit}</td>
-                    <td>${item.count}</td>
+                    <td><strong>${formatNumber(item.currentQuantity)} ${item.unit}</strong></td>
                 </tr>
             `;
         });
@@ -662,14 +658,25 @@
         tbody.innerHTML = "";
 
         batches.forEach(batch => {
+            const locationName = normalizeLocation(batch.locationName);
+            const responsible = getResponsiblePerson(batch);
+            const price = Number(batch.price || 0);
+            const purchasedQuantity = Number(batch.purchasedQuantity || 0);
+            const totalPrice = price > 0 && purchasedQuantity > 0 ? price * purchasedQuantity : null;
+
             tbody.innerHTML += `
-                <tr data-location="${normalizeLocation(batch.locationName)}" data-status="${getStatus(batch)}">
+                <tr data-location="${locationName}" data-status="${getStatus(batch)}">
                     <td>${valueOrDash(batch.chemicalName)}</td>
                     <td>${valueOrDash(batch.manufacturerName)}</td>
                     <td>${valueOrDash(batch.purity)}</td>
                     <td>${formatNumber(batch.packageSize)} ${valueOrDash(batch.packageUnit)}</td>
-                    <td>${normalizeLocation(batch.locationName)}</td>
-                    <td>${batch.price ? formatNumber(batch.price) + " RSD" : "—"}</td>
+                    <td>${valueOrDash(batch.purchasedQuantity)}</td>
+                    <td><strong>${formatNumber(batch.totalQuantity)} ${valueOrDash(batch.packageUnit)}</strong></td>
+                    <td>${locationName}</td>
+                    <td>${responsible}</td>
+                    <td>${price > 0 ? formatCurrency(price) : "—"}</td>
+                    <td><strong>${totalPrice !== null ? formatCurrency(totalPrice) : "—"}</strong></td>
+                    <td>${formatNote(batch.note)}</td>
                 </tr>
             `;
         });
@@ -827,11 +834,34 @@
         return value === null || value === undefined || value === "" ? "—" : value;
     }
 
+
+    function normalizeUnit(unit) {
+        if (!unit) return "";
+
+        const normalized = unit.toString().trim().toLowerCase();
+
+        if (["l", "lit", "litar", "litri", "liter", "liters"].includes(normalized)) return "L";
+        if (["ml", "mililitar", "mililitri", "milliliter", "milliliters"].includes(normalized)) return "ml";
+        if (["g", "gram", "grami", "grams"].includes(normalized)) return "g";
+
+        return unit;
+    }
+
     function formatNumber(value) {
         if (value === null || value === undefined || value === "") return "—";
         const number = Number(value);
         if (Number.isNaN(number)) return value;
         return Number.isInteger(number) ? number.toString() : number.toString();
+    }
+
+    function formatCurrency(value) {
+        const number = Number(value);
+        if (Number.isNaN(number)) return "—";
+
+        return number.toLocaleString("sr-RS", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + " RSD";
     }
 
     function getStatus(batch) {
