@@ -285,9 +285,9 @@
                     </p>
                 </div>
 
-                <button class="btn-primary-custom">
-                    <i class="bi bi-plus-lg"></i>
-                    Novi korisnik
+                <button class="btn-primary-custom admin-only" onclick="openAddAdminModal()">
+                    <i class="bi bi-shield-plus"></i>
+                    Dodaj admina
                 </button>
             </div>
 
@@ -487,14 +487,53 @@
         </div>
 
     </div>
-
+    <div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="addAdminModalLabel">
+                        <i class="bi bi-shield-lock me-2 text-primary"></i>Dodaj novog administratora
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAdminForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Ime *</label>
+                                <input type="text" class="form-control" id="formFirstName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Prezime *</label>
+                                <input type="text" class="form-control" id="formLastName" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Email adresa *</label>
+                                <input type="email" class="form-control" id="formEmail" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Lozinka *</label>
+                                <input type="password" class="form-control" id="formPassword" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Odustani</button>
+                    <button type="button" class="btn btn-primary-custom text-white" onclick="submitAdminForm()">
+                        <i class="bi bi-check2-circle me-1"></i> Sačuvaj admina
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    const email = sessionStorage.getItem("email");
-
-    if (email) {
-        document.getElementById("userEmail").textContent = email;
+    const ulogovaniEmail = sessionStorage.getItem("email");
+    if (ulogovaniEmail) {
+        document.getElementById("userEmail").textContent = ulogovaniEmail;
     }
 
     fetch("/api/current-user")
@@ -502,12 +541,70 @@
         .then(user => {
             document.getElementById("userEmail").textContent = user.email;
 
-            if (user.role !== "ADMIN") {
+            const roleName = user.role.name || user.role;
+            const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
+
+            if (isAdmin) {
+                document.querySelectorAll(".admin-only").forEach(element => {
+                    element.classList.remove("admin-only");
+                });
+            } else {
                 document.querySelectorAll(".admin-only").forEach(element => {
                     element.style.display = "none";
                 });
             }
-        });
+        })
+        .catch(error => console.error("Greška pri proveri uloge korisnika:", error));
+
+    function openAddAdminModal() {
+        document.getElementById('addAdminForm').reset();
+        const modal = new bootstrap.Modal(document.getElementById('addAdminModal'));
+        modal.show();
+    }
+
+    async function submitAdminForm() {
+        const form = document.getElementById('addAdminForm');
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const firstName = document.getElementById('formFirstName').value.trim();
+        const lastName = document.getElementById('formLastName').value.trim();
+        const emailVal = document.getElementById('formEmail').value.trim();
+        const password = document.getElementById('formPassword').value;
+
+        const userPayload = {
+            firstName: firstName,
+            lastName: lastName,
+            email: emailVal,
+            password: password,
+            active: true,
+            role: { id: 1 }
+        };
+
+        try {
+            const response = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userPayload)
+            });
+
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                throw new Error(`Server je odbio zahtev:\n${errorMessage}`);
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('addAdminModal')).hide();
+            alert("Administrator uspešno kreiran!");
+            location.reload();
+
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        }
+    }
 </script>
 
 </body>

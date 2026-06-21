@@ -1,6 +1,7 @@
 package uns.ac.rs.chemlabinventory.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,7 +34,7 @@ public class User {
     @Column(name = "email", nullable = false, length = 150)
     private String email;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Size(max = 255)
     @NotNull
     @Column(name = "password", nullable = false)
