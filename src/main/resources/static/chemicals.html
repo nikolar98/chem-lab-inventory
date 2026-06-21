@@ -140,11 +140,16 @@
 
         .btn-primary-custom {
             background: #008b95;
+            color: white;
             border: none;
+            border-radius: 10px;
+            padding: 11px 18px;
+            font-weight: normal;
         }
 
         .btn-primary-custom:hover {
             background: #00757e;
+            color: white;
         }
 
         .table th {
@@ -315,18 +320,9 @@
 
         <h4 class="mb-0">Hemikalije</h4>
 
-        <div class="d-flex align-items-center gap-3">
-
-            <button class="btn btn-primary-custom text-white admin-only">
-                <i class="bi bi-plus-lg"></i>
-                Dodaj hemikaliju
-            </button>
-
-            <div class="text-end">
-                <strong>Dobrodošli</strong><br>
-                <small id="userEmail">admin@test.com</small>
-            </div>
-
+        <div class="text-end">
+            <strong>Dobrodošli</strong><br>
+            <small id="userEmail">admin@test.com</small>
         </div>
 
     </div>
@@ -335,19 +331,25 @@
 
         <div class="page-card">
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-4">
 
                 <div>
                     <h2>Lista hemikalija</h2>
-
                     <p class="text-muted">
                         Podaci se učitavaju iz baze. Trenutna količina se menja nakon izdavanja/potrošnje.
                     </p>
                 </div>
 
-                <div class="results-info">
-                    Ukupno: <strong id="totalCount">0</strong> zapisa<br>
-                    Prikazano: <strong id="visibleCount">0</strong>
+                <div class="d-flex flex-column align-items-end gap-2">
+                    <button class="btn btn-primary-custom text-white admin-only">
+                        <i class="bi bi-plus-lg"></i>
+                        Dodaj hemikaliju
+                    </button>
+
+                    <div class="results-info text-end">
+                        Ukupno: <strong id="totalCount">0</strong><br>
+                        Prikazano: <strong id="visibleCount">0</strong>
+                    </div>
                 </div>
 
             </div>
@@ -475,8 +477,109 @@
         </div>
 
     </div>
+    <div class="modal fade" id="addChemicalModal" tabindex="-1" aria-labelledby="addChemicalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="addChemicalModalLabel">
+                        <i class="bi bi-flask me-2 text-primary"></i>Dodaj novu hemikaliju
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addChemicalForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Naziv hemikalije *</label>
+                                <input type="text" class="form-control" id="formChemName" list="chemNameList" required autocomplete="off" placeholder="Upiši ili izaberi postojećú">
+                                <datalist id="chemNameList"></datalist>
+                                <small class="text-muted" style="font-size: 0.8rem;">Sistem će kreirati novu ukoliko je nema u katalogu.</small>
+                            </div>
 
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Proizvođač *</label>
+                                <select class="form-select" id="formManufacturer" required>
+                                    <option value="">Učitavanje proizvođača...</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Čistoća</label>
+                                <input type="text" class="form-control" id="formPurity" list="purityList" placeholder="Npr. 99.9% ili P.A." autocomplete="off">
+                                <datalist id="purityList">
+                                    <option value="99.9%">
+                                    <option value="99.50%">
+                                    <option value="99.70%">
+                                    <option value="99%">
+                                    <option value="ACN">
+                                    <option value="GC">
+                                    <option value="HPLC">
+                                    <option value="P.A.">
+                                    <option value="Ultra Rezi">
+                                </datalist>
+                                <small class="text-muted" style="font-size: 0.8rem;">Može ostati prazno ukoliko čistoća nije definisana.</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Lokacija skladištenja</label>
+                                <select class="form-select" id="formLocation">
+                                    <option value="">Učitavanje lokacija...</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Zadužena osoba</label>
+                                <select class="form-select" id="formResponsibleUser">
+                                    <option value="">Učitavanje korisnika...</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12"><hr class="my-2"></div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Veličina pakovanja *</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0" class="form-control" id="formPackageSize" placeholder="Npr. 2.5" required>
+                                    <select class="form-select" id="formPackageUnit" style="max-width: 85px;" required>
+                                        <option value="L">L</option>
+                                        <option value="ml">ml</option>
+                                        <option value="kg">kg</option>
+                                        <option value="g">g</option>
+                                        <option value="mg">mg</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Količina (broj komada) *</label>
+                                <input type="number" class="form-control" id="formQuantity" value="1" min="1" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Cena po pakovanju (RSD)</label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="formPrice" placeholder="Opciono">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mt-4 mb-0 d-flex align-items-center">
+                            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                            <div>
+                                <strong>Obračun za upis:</strong> Biće uneto ukupno <strong class="text-primary fs-5 ms-1" id="calcTotal">0</strong> <strong class="text-primary fs-5" id="calcUnit">L</strong> u magacin.
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Odustani</button>
+                    <button type="button" class="btn btn-primary-custom text-white" onclick="submitChemicalForm()">
+                        <i class="bi bi-check2-circle me-1"></i> Sačuvaj na stanje
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     let allBatches = [];
@@ -491,24 +594,35 @@
     const rowsPerPageSelect = document.getElementById("rowsPerPageSelect");
 
     document.addEventListener("DOMContentLoaded", () => {
-        loadCurrentUser();
         loadChemicalBatches();
         setupEvents();
     });
 
-    function loadCurrentUser() {
-        fetch("/api/current-user")
-            .then(response => response.json())
-            .then(user => {
-                document.getElementById("userEmail").textContent = user.email;
+    const email = sessionStorage.getItem("email");
 
-                if (user.role === "ADMIN") {
-                    document.querySelectorAll(".admin-only").forEach(element => {
-                        element.classList.remove("admin-only");
-                    });
-                }
-            });
+    if (email) {
+        document.getElementById("userEmail").textContent = email;
     }
+
+    fetch("/api/current-user")
+        .then(response => response.json())
+        .then(user => {
+            document.getElementById("userEmail").textContent = user.email;
+
+            const roleName = user.role.name || user.role;
+            const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
+
+            if (isAdmin) {
+                document.querySelectorAll(".admin-only").forEach(element => {
+                    element.classList.remove("admin-only");
+                });
+            } else {
+                document.querySelectorAll(".admin-only").forEach(element => {
+                    element.style.display = "none";
+                });
+            }
+        })
+        .catch(error => console.error("Greška pri proveri uloge korisnika:", error));
 
     function loadChemicalBatches() {
         fetch("/api/chemical-batches")
@@ -869,6 +983,161 @@
             return "kriticno";
         }
         return "optimalno";
+    }
+    let existingChemicals = [];
+    let existingManufacturers = [];
+    let existingLocations = [];
+
+    const addBtn = document.querySelector('button.btn-primary-custom.admin-only');
+    if (addBtn) {
+        addBtn.addEventListener('click', openAddChemicalModal);
+    }
+
+    document.getElementById('formPackageSize').addEventListener('input', updateCalculatedTotal);
+    document.getElementById('formPackageUnit').addEventListener('change', updateCalculatedTotal);
+    document.getElementById('formQuantity').addEventListener('input', updateCalculatedTotal);
+
+    function updateCalculatedTotal() {
+        const size = parseFloat(document.getElementById('formPackageSize').value) || 0;
+        const qty = parseInt(document.getElementById('formQuantity').value) || 0;
+        const unit = document.getElementById('formPackageUnit').value;
+        const total = size * qty;
+
+        document.getElementById('calcTotal').textContent = total.toFixed(2).replace(/\.00$/, '');
+        document.getElementById('calcUnit').textContent = unit;
+    }
+
+    function openAddChemicalModal() {
+        const fetchJson = async (url) => {
+            const res = await fetch(url);
+            if (!res.ok) {
+                throw new Error(`API poziv ka ${url} je pukao sa statusom: ${res.status}`);
+            }
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error(`API poziv ka ${url} nije vratio JSON. Verovatno te Spring Security blokira.`);
+            }
+            return res.json();
+        };
+
+        // Dodat API poziv za korisnike
+        Promise.all([
+            fetchJson('/api/chemicals'),
+            fetchJson('/api/manufacturers'),
+            fetchJson('/api/locations'),
+            fetchJson('/api/users')
+        ]).then(([chemicals, manufacturers, locations, users]) => {
+            existingChemicals = chemicals;
+            existingManufacturers = manufacturers;
+            existingLocations = locations;
+
+            // 1. Datalist za hemikalije
+            const chemList = document.getElementById('chemNameList');
+            chemList.innerHTML = '';
+            chemicals.forEach(c => {
+                chemList.innerHTML += `<option value="${c.name}">`;
+            });
+
+            // 2. Select za proizvođače
+            const manSelect = document.getElementById('formManufacturer');
+            manSelect.innerHTML = '<option value="">Izaberi proizvođača...</option>';
+            manufacturers.forEach(m => {
+                manSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+            });
+
+            // 3. Select za lokacije
+            const locSelect = document.getElementById('formLocation');
+            locSelect.innerHTML = '<option value="">Izaberi lokaciju...</option>';
+            locations.forEach(l => {
+                locSelect.innerHTML += `<option value="${l.id}">${l.name}</option>`;
+            });
+
+            // 4. Select za zadužene osobe (NOVO)
+            const userSelect = document.getElementById('formResponsibleUser');
+            userSelect.innerHTML = '<option value="">Bez zadužene osobe</option>';
+            users.forEach(u => {
+                userSelect.innerHTML += `<option value="${u.id}">${u.firstName} ${u.lastName}</option>`;
+            });
+
+            document.getElementById('addChemicalForm').reset();
+            updateCalculatedTotal();
+
+            const modal = new bootstrap.Modal(document.getElementById('addChemicalModal'));
+            modal.show();
+        }).catch(err => {
+            console.error(err);
+            alert("Greška: " + err.message);
+        });
+    }
+
+    async function submitChemicalForm() {
+        const form = document.getElementById('addChemicalForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const name = document.getElementById('formChemName').value.trim();
+        let purity = document.getElementById('formPurity').value.trim();
+
+        const manufacturerId = document.getElementById('formManufacturer').value;
+        const locationId = document.getElementById('formLocation').value;
+        const responsibleUserId = document.getElementById('formResponsibleUser').value; // NOVO
+        const packageSize = parseFloat(document.getElementById('formPackageSize').value);
+        const packageUnit = document.getElementById('formPackageUnit').value;
+        const quantity = parseInt(document.getElementById('formQuantity').value);
+        const price = parseFloat(document.getElementById('formPrice').value) || null;
+
+        const totalQty = packageSize * quantity;
+
+        try {
+            let chemical = existingChemicals.find(c => c.name.toLowerCase() === name.toLowerCase());
+
+            if (!chemical) {
+                const chemResponse = await fetch('/api/chemicals', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        unit: packageUnit,
+                        minimumQuantity: 0.0
+                    })
+                });
+
+                if (!chemResponse.ok) throw new Error("Neuspešno kreiranje nove hemikalije u katalogu.");
+                chemical = await chemResponse.json();
+            }
+
+            const batchPayload = {
+                chemical: { id: chemical.id },
+                manufacturer: manufacturerId ? { id: manufacturerId } : null,
+                location: locationId ? { id: locationId } : null,
+                responsibleUser: responsibleUserId ? { id: responsibleUserId } : null, // NOVO
+                purity: purity,
+                packageSize: packageSize,
+                packageUnit: packageUnit,
+                purchasedQuantity: quantity,
+                totalQuantity: totalQty,
+                currentQuantity: totalQty,
+                price: price
+            };
+
+            const batchResponse = await fetch('/api/chemical-batches', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(batchPayload)
+            });
+
+            if (!batchResponse.ok) throw new Error("Greška pri upisu zalihe u magacin.");
+
+            bootstrap.Modal.getInstance(document.getElementById('addChemicalModal')).hide();
+            loadChemicalBatches();
+            alert("Hemikalija uspešno dodata na stanje!");
+
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        }
     }
 </script>
 
