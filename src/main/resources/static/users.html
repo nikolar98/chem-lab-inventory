@@ -404,80 +404,7 @@
                     </tr>
                     </thead>
 
-                    <tbody>
-
-                    <tr>
-                        <td><span class="avatar">MP</span></td>
-                        <td><strong>Marko Petrović</strong></td>
-                        <td>marko.petrovic@test.com</td>
-                        <td><span class="role role-admin">Administrator</span></td>
-                        <td>Da</td>
-                        <td>Laboratorija 1 - Orman A</td>
-                        <td><span class="status status-active">Aktivan</span></td>
-                        <td>31.05.2025 10:15</td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline-secondary action-btn"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-outline-secondary action-btn"><i class="bi bi-pencil"></i></button>
-                                <button class="btn btn-outline-danger action-btn"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td><span class="avatar">MJ</span></td>
-                        <td><strong>Milica Jovanović</strong></td>
-                        <td>milica.jovanovic@test.com</td>
-                        <td><span class="role role-user">Korisnik</span></td>
-                        <td>Ne</td>
-                        <td>Laboratorija 2 - Orman C</td>
-                        <td><span class="status status-active">Aktivan</span></td>
-                        <td>31.05.2025 09:42</td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline-secondary action-btn"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-outline-secondary action-btn"><i class="bi bi-pencil"></i></button>
-                                <button class="btn btn-outline-danger action-btn"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td><span class="avatar">AN</span></td>
-                        <td><strong>Aleksandar Nikolić</strong></td>
-                        <td>aleksandar.nikolic@test.com</td>
-                        <td><span class="role role-user">Korisnik</span></td>
-                        <td>Da</td>
-                        <td>Laboratorija 1 - Orman B</td>
-                        <td><span class="status status-active">Aktivan</span></td>
-                        <td>31.05.2025 11:03</td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline-secondary action-btn"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-outline-secondary action-btn"><i class="bi bi-pencil"></i></button>
-                                <button class="btn btn-outline-danger action-btn"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td><span class="avatar">NI</span></td>
-                        <td><strong>Nikola Ilić</strong></td>
-                        <td>nikola.ilic@test.com</td>
-                        <td><span class="role role-user">Korisnik</span></td>
-                        <td>Ne</td>
-                        <td>Arhiva - Zapaljive materije</td>
-                        <td><span class="status status-inactive">Neaktivan</span></td>
-                        <td>25.05.2025 08:55</td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline-secondary action-btn"><i class="bi bi-eye"></i></button>
-                                <button class="btn btn-outline-secondary action-btn"><i class="bi bi-pencil"></i></button>
-                                <button class="btn btn-outline-danger action-btn"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-
+                    <tbody id="usersTableBody">
                     </tbody>
 
                 </table>
@@ -604,6 +531,94 @@
             console.error(error);
             alert(error.message);
         }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadUsers();
+    });
+
+    function loadUsers() {
+        fetch("/api/users")
+            .then(response => response.json())
+            .then(users => {
+                const tbody = document.getElementById("usersTableBody");
+                tbody.innerHTML = "";
+
+                users.forEach(user => {
+                    const firstName = user.firstName || "";
+                    const lastName = user.lastName || "";
+                    const fullName = `${firstName} ${lastName}`.trim();
+
+                    let initials = "—";
+                    if (firstName && lastName) {
+                        initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                    } else if (firstName) {
+                        initials = firstName.charAt(0).toUpperCase();
+                    }
+
+                    const roleName = user.role ? (user.role.name || user.role) : "";
+                    const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
+                    const roleBadge = isAdmin
+                        ? '<span class="role role-admin">Administrator</span>'
+                        : '<span class="role role-user">Korisnik</span>';
+
+                    const statusBadge = user.active !== false
+                        ? '<span class="status status-active">Aktivan</span>'
+                        : '<span class="status status-inactive">Neaktivan</span>';
+
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td><span class="avatar">${initials}</span></td>
+                        <td><strong>${fullName}</strong></td>
+                        <td>${user.email || "—"}</td>
+                        <td>${roleBadge}</td>
+                        <td>—</td> <td>—</td> <td>${statusBadge}</td>
+                        <td>—</td> <td>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-secondary action-btn" onclick="viewUser(${user.id})" title="Pregled">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary action-btn" onclick="editUser(${user.id})" title="Izmena">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger action-btn" onclick="deleteUser(${user.id})" title="Brisanje">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error("Greška pri učitavanju korisnika:", error));
+    }
+
+    function deleteUser(userId) {
+        if (confirm("Da li ste sigurni da želite obrisati ovog korisnika?")) {
+            fetch(`/api/users/${userId}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Korisnik je uspešno obrisan.");
+                        loadUsers();
+                    } else {
+                        throw new Error("Greška pri brisanju sa servera.");
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Došlo je do greške prilikom brisanja korisnika.");
+                });
+        }
+    }
+
+    function viewUser(userId) {
+        alert("");
+    }
+
+    function editUser(userId) {
+        alert("");
     }
 </script>
 
