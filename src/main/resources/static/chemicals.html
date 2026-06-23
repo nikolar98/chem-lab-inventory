@@ -361,7 +361,7 @@
             </div>
 
             <div class="summary-description" id="summaryDescription">
-                Prikazuje trenutnu količinu hemikalije iste čistoće, bez obzira na lokaciju, proizvođača i zaduženu osobu.
+                Prikaz trenutne količine hemikalija iste čistoće, bez obzira na lokaciju, proizvođača i zaduženu osobu.
             </div>
 
             <div class="location-tabs" id="locationTabsBlock">
@@ -371,36 +371,8 @@
                 <button class="location-tab" data-location="Lab 1P">Lab 1P</button>
             </div>
 
-            <div class="row g-3 mb-4">
-
-                <div class="col-md-4">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Pretraži hemikalije...">
-                </div>
-
-                <div class="col-md-3" id="locationFilterColumn">
-                    <select class="form-select" id="locationSelect">
-                        <option value="all">Sve lokacije</option>
-                        <option value="NS bunker">NS bunker</option>
-                        <option value="Superlab">Superlab</option>
-                        <option value="Lab 1P">Lab 1P</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <select class="form-select" id="statusSelect">
-                        <option value="all">Svi statusi</option>
-                        <option value="optimalno">Optimalno</option>
-                        <option value="nisko">Nisko</option>
-                        <option value="kriticno">Kritično</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <button class="btn btn-outline-secondary w-100" onclick="applyFilters()">
-                        Filter
-                    </button>
-                </div>
-
+            <div class="mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Pretraga...">
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -491,7 +463,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Naziv hemikalije *</label>
-                                <input type="text" class="form-control" id="formChemName" list="chemNameList" required autocomplete="off" placeholder="Upiši ili izaberi postojećú">
+                                <input type="text" class="form-control" id="formChemName" list="chemNameList" required autocomplete="off" placeholder="Upiši ili izaberi postojeću">
                                 <datalist id="chemNameList"></datalist>
                                 <small class="text-muted" style="font-size: 0.8rem;">Sistem će kreirati novu ukoliko je nema u katalogu.</small>
                             </div>
@@ -572,7 +544,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Odustani</button>
                     <button type="button" class="btn btn-primary-custom text-white" onclick="submitChemicalForm()">
-                        <i class="bi bi-check2-circle me-1"></i> Sačuvaj na stanje
+                        <i class="bi bi-check2-circle me-1"></i> Dodaj hemikaliju
                     </button>
                 </div>
             </div>
@@ -587,10 +559,9 @@
     let rowsPerPage = 10;
     let currentPage = 1;
     let sortDirections = {};
+    let selectedLocation = "all";
 
     const searchInput = document.getElementById("searchInput");
-    const locationSelect = document.getElementById("locationSelect");
-    const statusSelect = document.getElementById("statusSelect");
     const rowsPerPageSelect = document.getElementById("rowsPerPageSelect");
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -660,26 +631,13 @@
             tab.addEventListener("click", () => {
                 document.querySelectorAll(".location-tab").forEach(t => t.classList.remove("active"));
                 tab.classList.add("active");
-                locationSelect.value = tab.dataset.location;
+                selectedLocation = tab.dataset.location;
                 currentPage = 1;
                 applyFilters();
             });
         });
 
-        locationSelect.addEventListener("change", () => {
-            document.querySelectorAll(".location-tab").forEach(tab => {
-                tab.classList.toggle("active", tab.dataset.location === locationSelect.value);
-            });
-            currentPage = 1;
-            applyFilters();
-        });
-
         searchInput.addEventListener("input", () => {
-            currentPage = 1;
-            applyFilters();
-        });
-
-        statusSelect.addEventListener("change", () => {
             currentPage = 1;
             applyFilters();
         });
@@ -805,7 +763,6 @@
         document.getElementById("pricesView").classList.add("d-none");
 
         document.getElementById("locationTabsBlock").style.display = currentView === "details" || currentView === "prices" ? "flex" : "none";
-        document.getElementById("locationFilterColumn").style.display = currentView === "details" || currentView === "prices" ? "block" : "none";
 
         if (currentView === "summary") {
             document.getElementById("summaryView").classList.remove("d-none");
@@ -820,8 +777,7 @@
     }
 
     function applyFilters() {
-        const selectedLocation = locationSelect.value;
-        const selectedStatus = statusSelect.value;
+        const selectedStatus = "all";
         const searchValue = searchInput.value.toLowerCase().trim();
         const tbodyId = getCurrentTbodyId();
         const tbody = document.getElementById(tbodyId);

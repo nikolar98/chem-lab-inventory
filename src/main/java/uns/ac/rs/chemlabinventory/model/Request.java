@@ -48,7 +48,6 @@ public class Request {
     @Column(name = "comment", length = 500)
     private String comment;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
