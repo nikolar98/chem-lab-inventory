@@ -131,3 +131,35 @@ WHERE id > 0
 SELECT DISTINCT purity
 FROM chemical_batches
 ORDER BY purity;
+
+---------
+
+ALTER TABLE chemical_batches
+    CHANGE COLUMN price package_price DECIMAL(12,2);
+
+ALTER TABLE chemical_batches
+    ADD COLUMN total_price DECIMAL(12,2);
+
+------ ako treba
+ALTER TABLE chemical_batches
+DROP COLUMN price;
+-----
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE chemical_batches
+SET package_price = ROUND(500 + RAND() * 9500, 2);
+
+SET SQL_SAFE_UPDATES = 1;
+
+UPDATE chemical_batches
+SET total_price = package_price * purchased_quantity
+WHERE id > 0;
+
+
+SELECT
+    id,
+    package_price,
+    purchased_quantity,
+    total_price
+FROM chemical_batches;
