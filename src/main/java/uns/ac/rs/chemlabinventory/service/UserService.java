@@ -34,7 +34,9 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void delete(Long id) {
-        userRepository.deleteById(id);
+    public User toggleUserActivity(Long id) {
+        User user = findById(id);
+        user.setActive(!user.isActive());
+        return userRepository.save(user);
     }
 }

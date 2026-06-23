@@ -31,8 +31,8 @@ public class UserController {
         return userService.save(user);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        userService.delete(id);
+    @PutMapping("/{id}/toggle-activity")
+    public User toggleActivity(@PathVariable Long id) {
+        return userService.toggleUserActivity(id);
     }
 }
