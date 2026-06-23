@@ -45,6 +45,7 @@ public class UserService {
             }
         }
 
+        userRepository.updateUserActivity(id, requestedActive);
         user.setActive(requestedActive);
         return userRepository.save(user);
     }
