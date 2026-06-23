@@ -34,9 +34,18 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User toggleUserActivity(Long id) {
+    public User changeUserActivity(Long id, boolean requestedActive) {
         User user = findById(id);
-        user.setActive(!user.isActive());
+
+        if (user.isActive() == requestedActive) {
+            if (requestedActive) {
+                throw new IllegalArgumentException("Nalog je već bio aktivan!");
+            } else {
+                throw new IllegalArgumentException("Nalog je već bio neaktivan!");
+            }
+        }
+
+        user.setActive(requestedActive);
         return userRepository.save(user);
     }
 }

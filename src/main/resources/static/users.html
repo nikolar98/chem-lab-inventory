@@ -347,6 +347,30 @@
 
             </div>
 
+            <div class="page-card mb-4 border border-info admin-only">
+                <h5 class="mb-3"><i class="bi bi-person-gear me-2"></i>Promeni status korisnika</h5>
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold">Izaberi korisnika:</label>
+                        <select id="statusUserSelect" class="form-select">
+                            <option value="">-- Selektuj korisnika --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Novi status:</label>
+                        <select id="statusValueSelect" class="form-select">
+                            <option value="true">Aktivan</option>
+                            <option value="false">Neaktivan</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary-custom w-100" onclick="submitStatusChange()">
+                            PROMENI STATUS
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="row g-3">
 
                 <div class="col-md-6">
@@ -532,6 +556,11 @@
                 const tbody = document.getElementById("usersTableBody");
                 tbody.innerHTML = "";
 
+                const userSelect = document.getElementById("statusUserSelect");
+                if (userSelect) {
+                    userSelect.innerHTML = '<option value="">-- Selektuj korisnika --</option>';
+                }
+
                 users.forEach(user => {
                     const firstName = user.firstName || "";
                     const lastName = user.lastName || "";
@@ -556,14 +585,21 @@
 
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td><span class="avatar">${initials}</span></td>
-                        <td><strong>${fullName}</strong></td>
-                        <td>${user.email || "—"}</td>
-                        <td>${roleBadge}</td>
-<td>${statusBadge}</td>
-<td>—</td>
-                    `;
+                    <td><span class="avatar">${initials}</span></td>
+                    <td><strong>${fullName}</strong></td>
+                    <td>${user.email || "—"}</td>
+                    <td>${roleBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>—</td>
+                `;
                     tbody.appendChild(tr);
+
+                    if (userSelect) {
+                        const option = document.createElement("option");
+                        option.value = user.id;
+                        option.textContent = `${fullName} (${user.email})`;
+                        userSelect.appendChild(option);
+                    }
                 });
             })
             .catch(error => console.error("Greška pri učitavanju korisnika:", error));
@@ -595,6 +631,33 @@
 
     function editUser(userId) {
         alert("");
+    }
+
+    function submitStatusChange() {
+        const userId = document.getElementById("statusUserSelect").value;
+        const requestedActive = document.getElementById("statusValueSelect").value; // Hvata "true" ili "false"
+
+        if (!userId) {
+            alert("Molimo vas da prvo izaberete korisnika iz liste!");
+            return;
+        }
+
+        fetch(`/api/users/${userId}/change-status?active=${requestedActive}`, {
+            method: 'PUT'
+        })
+            .then(async response => {
+                if (response.ok) {
+                    alert("Status korisnika je uspešno promenjen!");
+                    loadUsers();
+                } else {
+                    const errorMessage = await response.text();
+                    alert(errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error("Greška:", error);
+                alert("Došlo je do greške na sistemu.");
+            });
     }
 </script>
 

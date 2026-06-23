@@ -1,5 +1,6 @@
 package uns.ac.rs.chemlabinventory.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uns.ac.rs.chemlabinventory.model.User;
 import uns.ac.rs.chemlabinventory.service.UserService;
@@ -31,8 +32,13 @@ public class UserController {
         return userService.save(user);
     }
 
-    @PutMapping("/{id}/toggle-activity")
-    public User toggleActivity(@PathVariable Long id) {
-        return userService.toggleUserActivity(id);
+    @PutMapping("/{id}/change-status")
+    public ResponseEntity<?> changeStatus(@PathVariable Long id, @RequestParam boolean active) {
+        try {
+            User updatedUser = userService.changeUserActivity(id, active);
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
