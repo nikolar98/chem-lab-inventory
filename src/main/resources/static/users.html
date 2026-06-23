@@ -300,7 +300,7 @@
                         </div>
                         <div>
                             <span>Ukupno korisnika</span>
-                            <h3>18</h3>
+                            <h3 id="countTotal">0</h3>
                             <small class="text-muted">registrovanih korisnika</small>
                         </div>
                     </div>
@@ -313,7 +313,7 @@
                         </div>
                         <div>
                             <span>Aktivni korisnici</span>
-                            <h3>16</h3>
+                            <h3 id="countActive">0</h3>
                             <small class="text-muted">trenutno aktivnih</small>
                         </div>
                     </div>
@@ -326,7 +326,7 @@
                         </div>
                         <div>
                             <span>Administratori</span>
-                            <h3>3</h3>
+                            <h3 id="countAdmin">0</h3>
                             <small class="text-muted">korisnika sa admin pravima</small>
                         </div>
                     </div>
@@ -339,7 +339,7 @@
                         </div>
                         <div>
                             <span>Neaktivni korisnici</span>
-                            <h3>2</h3>
+                            <h3 id="countInactive">0</h3>
                             <small class="text-muted">privremeno onemogućeni</small>
                         </div>
                     </div>
@@ -371,27 +371,28 @@
                 </div>
             </div>
 
-            <div class="row g-3">
+            <div class="row g-3 mb-4">
 
                 <div class="col-md-6">
-                    <input type="text"
+                    <input type="text" id="searchInput"
                            class="form-control"
-                           placeholder="Pretraži korisnike...">
+                           autocomplete="off"
+                           placeholder="Pretraži po imenu, prezimenu ili emailu...">
                 </div>
 
                 <div class="col-md-3">
-                    <select class="form-select">
-                        <option>Sve role</option>
-                        <option>Administrator</option>
-                        <option>Korisnik</option>
+                    <select id="roleFilter" class="form-select">
+                        <option value="ALL">Sve uloge</option>
+                        <option value="ADMIN">Administrator</option>
+                        <option value="USER">Korisnik</option>
                     </select>
                 </div>
 
                 <div class="col-md-3">
-                    <select class="form-select">
-                        <option>Svi statusi</option>
-                        <option>Aktivan</option>
-                        <option>Neaktivan</option>
+                    <select id="statusFilter" class="form-select">
+                        <option value="ALL">Svi statusi</option>
+                        <option value="ACTIVE">Aktivan</option>
+                        <option value="INACTIVE">Neaktivan</option>
                     </select>
                 </div>
 
@@ -403,16 +404,17 @@
 
             <div class="table-responsive">
 
-                <table class="table align-middle">
+                <table class="table align-middle" style="table-layout: fixed; width: 100%;">
 
                     <thead>
                     <tr>
-                        <th></th>
-                        <th>Ime i prezime</th>
-                        <th>Email</th>
-                        <th>Uloga</th>
-                        <th>Status</th>
-                        <th>Poslednja prijava</th>
+                        <th style="width: 8%;"></th>
+                        <th style="width: 22%;">Ime i prezime</th>
+                        <th style="width: 25%;">Email</th>
+                        <th style="width: 12%;">Uloga</th>
+                        <th style="width: 10%;">Status</th>
+                        <th style="width: 13%;">Poslednja prijava</th>
+                        <th style="width: 10%;">Obriši korisnika</th>
                     </tr>
                     </thead>
 
@@ -545,64 +547,142 @@
         }
     }
 
+    let allUsersData = [];
+
     document.addEventListener("DOMContentLoaded", () => {
         loadUsers();
+        document.getElementById("searchInput").addEventListener("input", applyFilters);
+        document.getElementById("roleFilter").addEventListener("change", applyFilters);
+        document.getElementById("statusFilter").addEventListener("change", applyFilters);
     });
 
     function loadUsers() {
         fetch("/api/users")
             .then(response => response.json())
             .then(users => {
-                const tbody = document.getElementById("usersTableBody");
-                tbody.innerHTML = "";
-
-                const userSelect = document.getElementById("statusUserSelect");
-                if (userSelect) {
-                    userSelect.innerHTML = '<option value="">-- Selektuj korisnika --</option>';
-                }
-
-                users.forEach(user => {
-                    const firstName = user.firstName || "";
-                    const lastName = user.lastName || "";
-                    const fullName = `${firstName} ${lastName}`.trim();
-
-                    let initials = "—";
-                    if (firstName && lastName) {
-                        initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
-                    } else if (firstName) {
-                        initials = firstName.charAt(0).toUpperCase();
-                    }
-
-                    const roleName = user.role ? (user.role.name || user.role) : "";
-                    const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
-                    const roleBadge = isAdmin
-                        ? '<span class="role role-admin">Administrator</span>'
-                        : '<span class="role role-user">Korisnik</span>';
-
-                    const statusBadge = user.active !== false
-                        ? '<span class="status status-active">Aktivan</span>'
-                        : '<span class="status status-inactive">Neaktivan</span>';
-
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                    <td><span class="avatar">${initials}</span></td>
-                    <td><strong>${fullName}</strong></td>
-                    <td>${user.email || "—"}</td>
-                    <td>${roleBadge}</td>
-                    <td>${statusBadge}</td>
-                    <td>—</td>
-                `;
-                    tbody.appendChild(tr);
-
-                    if (userSelect) {
-                        const option = document.createElement("option");
-                        option.value = user.id;
-                        option.textContent = `${fullName} (${user.email})`;
-                        userSelect.appendChild(option);
-                    }
-                });
+                allUsersData = users;
+                applyFilters();
             })
             .catch(error => console.error("Greška pri učitavanju korisnika:", error));
+    }
+
+    function applyFilters() {
+        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+        const roleFilter = document.getElementById("roleFilter").value;
+        const statusFilter = document.getElementById("statusFilter").value;
+
+        const filteredUsers = allUsersData.filter(user => {
+            const firstName = user.firstName || "";
+            const lastName = user.lastName || "";
+            const email = user.email || "";
+            const fullName = `${firstName} ${lastName}`.toLowerCase();
+
+            const matchesSearch = fullName.includes(searchTerm) || email.toLowerCase().includes(searchTerm);
+
+            const roleName = user.role ? (user.role.name || user.role) : "";
+            const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
+
+            let matchesRole = true;
+            if (roleFilter === "ADMIN" && !isAdmin) matchesRole = false;
+            if (roleFilter === "USER" && isAdmin) matchesRole = false;
+
+            const isActive = user.active !== false;
+            let matchesStatus = true;
+            if (statusFilter === "ACTIVE" && !isActive) matchesStatus = false;
+            if (statusFilter === "INACTIVE" && isActive) matchesStatus = false;
+
+            return matchesSearch && matchesRole && matchesStatus;
+        });
+
+        renderUsers(filteredUsers);
+    }
+
+    function renderUsers(filteredUsers) {
+        const tbody = document.getElementById("usersTableBody");
+        tbody.innerHTML = "";
+
+        const userSelect = document.getElementById("statusUserSelect");
+        if (userSelect) {
+            userSelect.innerHTML = '<option value="">-- Selektuj korisnika --</option>';
+        }
+
+        let totalCount = allUsersData.length;
+        let activeCount = 0;
+        let adminCount = 0;
+        let inactiveCount = 0;
+
+        allUsersData.forEach(user => {
+            const roleName = user.role ? (user.role.name || user.role) : "";
+            const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
+            const isActive = user.active !== false;
+
+            if (isActive) activeCount++; else inactiveCount++;
+            if (isAdmin) adminCount++;
+
+            if (userSelect) {
+                const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+                const option = document.createElement("option");
+                option.value = user.id;
+                option.textContent = `${fullName} (${user.email})`;
+                userSelect.appendChild(option);
+            }
+        });
+
+        document.getElementById("countTotal").textContent = totalCount;
+        document.getElementById("countActive").textContent = activeCount;
+        document.getElementById("countAdmin").textContent = adminCount;
+        document.getElementById("countInactive").textContent = inactiveCount;
+
+        filteredUsers.forEach(user => {
+            const firstName = user.firstName || "";
+            const lastName = user.lastName || "";
+            const fullName = `${firstName} ${lastName}`.trim();
+
+            let initials = "—";
+            if (firstName && lastName) {
+                initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+            } else if (firstName) {
+                initials = firstName.charAt(0).toUpperCase();
+            }
+
+            const roleName = user.role ? (user.role.name || user.role) : "";
+            const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
+            const isActive = user.active !== false;
+
+            const roleBadge = isAdmin
+                ? '<span class="role role-admin">Administrator</span>'
+                : '<span class="role role-user">Korisnik</span>';
+
+            const statusBadge = isActive
+                ? '<span class="status status-active">Aktivan</span>'
+                : '<span class="status status-inactive">Neaktivan</span>';
+
+            let lastLoginFormatted = "—";
+            if (user.lastLogin) {
+                const dateObj = new Date(user.lastLogin);
+                lastLoginFormatted = dateObj.toLocaleString('sr-RS', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+            }
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+            <td><span class="avatar">${initials}</span></td>
+            <td><strong>${fullName}</strong></td>
+            <td>${user.email || "—"}</td>
+            <td>${roleBadge}</td>
+            <td>${statusBadge}</td>
+            <td>${lastLoginFormatted}</td> <td>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-danger action-btn" onclick="deleteUser(${user.id})" title="Brisanje">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 
     function deleteUser(userId) {

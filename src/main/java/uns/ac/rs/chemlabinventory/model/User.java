@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Entity
@@ -44,6 +46,9 @@ public class User {
     @ColumnDefault("1")
     @Column(name = "active", nullable = false)
     private Boolean active;
+
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
