@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/requests.html",
                                 "/users.html",
+                                "/reports.html",
                                 "/api/requests/**",
                                 "/api/users/**"
                         ).hasRole("ADMIN")

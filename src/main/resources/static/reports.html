@@ -1,0 +1,254 @@
+<!--<meta charset="UTF-8">-->
+
+<!--<h2>Izveštaji</h2>-->
+
+<!--<div class="card p-4">-->
+<!--    <h4>Vrednost hemikalija</h4>-->
+<!--    <p>Izveštaj prikazuje ukupnu cenu hemikalija grupisanu po nazivu.</p>-->
+
+<!--    <a href="/api/reports/chemical-inventory-value"-->
+<!--       target="_blank"-->
+<!--       class="btn btn-primary">-->
+<!--        Generiši PDF izveštaj-->
+<!--    </a>-->
+<!--</div>-->
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chem Lab Inventory - Izveštaji</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            color: #203a43;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            padding: 28px 18px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #cfd8dc;
+            margin-bottom: 35px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            text-decoration: none;
+            color: #eaf4f7;
+            padding: 13px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: .25s;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(0,188,212,.25);
+            color: white;
+        }
+
+        .logout {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,.2);
+            padding-top: 22px;
+        }
+
+        .logout button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,.12);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .logout button:hover {
+            background: rgba(255,255,255,.22);
+        }
+
+        .content {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+        }
+
+        .topbar {
+            background: white;
+            height: 80px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .page-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.04);
+        }
+
+        .report-card {
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+            transition: .2s;
+        }
+
+        .report-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .admin-only {
+            display: none;
+        }
+    </style>
+</head>
+
+<body style="display:flex;">
+
+<aside class="sidebar">
+
+    <div class="logo">
+        Hemijska<br>laboratorija
+    </div>
+
+    <div class="subtitle">
+        Sistem za evidenciju hemikalija i zaliha
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="/home.html">Početna</a>
+        <a href="/chemicals.html">Hemikalije</a>
+        <a href="/potrosnja.html">Potrošnja</a>
+        <a href="/users.html" class="admin-only">Korisnici</a>
+        <a href="/reports.html" class="active">Izveštaji</a>
+        <a href="/alerts.html">Upozorenja</a>
+        <a href="/requests.html" class="admin-only">Zahtevi</a>
+    </nav>
+
+    <form class="logout" action="/logout" method="post">
+        <button type="submit">Odjava</button>
+    </form>
+
+</aside>
+
+<div class="content">
+
+    <div class="topbar d-flex align-items-center justify-content-between px-4">
+
+        <h4 class="mb-0">Izveštaji</h4>
+
+        <div class="text-end">
+            <strong>Dobrodošli</strong><br>
+            <small id="userEmail">admin@test.com</small>
+        </div>
+
+    </div>
+
+    <div class="container-fluid p-4">
+
+        <div class="page-card">
+
+            <div class="mb-4">
+                <h2>Izveštaji</h2>
+
+                <p class="text-muted">
+                    Pregled dostupnih PDF izveštaja o hemikalijama i zalihama.
+                </p>
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <div class="card report-card p-4 h-100">
+
+                        <h4 class="mb-3">
+                            <i class="bi bi-file-earmark-pdf text-danger"></i>
+                            Vrednost hemikalija
+                        </h4>
+
+                        <p class="text-muted">
+                            Izveštaj prikazuje ukupnu vrednost hemikalija grupisanu po nazivu.
+                        </p>
+
+                        <div class="mt-3">
+                            <a href="/api/reports/chemical-inventory-value"
+                               target="_blank"
+                               class="btn btn-primary">
+                                <i class="bi bi-download"></i>
+                                Generiši PDF izveštaj
+                            </a>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    fetch("/api/current-user")
+        .then(response => response.json())
+        .then(user => {
+
+            document.getElementById("userEmail").textContent = user.email;
+
+            if (user.role === "ADMIN") {
+                document.querySelectorAll(".admin-only").forEach(element => {
+                    element.style.display = "block";
+                });
+            }
+
+        });
+
+</script>
+
+</body>
+</html>

@@ -69,7 +69,8 @@ public class ChemicalBatchService {
         dto.setTotalQuantity(batch.getTotalQuantity());
         dto.setCurrentQuantity(batch.getCurrentQuantity());
         dto.setExpirationDate(batch.getExpirationDate());
-        dto.setPrice(batch.getPrice());
+        dto.setPackagePrice(batch.getPackagePrice());
+        dto.setTotalPrice(batch.getTotalPrice());
         dto.setMinimumQuantityAlarm(batch.getMinimumQuantityAlarm());
         dto.setSdsFilePath(batch.getSdsFilePath());
         dto.setCertificateFilePath(batch.getCertificateFilePath());

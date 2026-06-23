@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -34,10 +35,16 @@ public class ChemicalBatchDTO {
     private String packageUnit;
 
     private Integer purchasedQuantity;
+
     private BigDecimal totalQuantity;
     private BigDecimal currentQuantity;
+
     private LocalDate expirationDate;
-    private BigDecimal price;
+
+    private BigDecimal packagePrice;
+
+    private BigDecimal totalPrice;
+
     private BigDecimal minimumQuantityAlarm;
 
     @Size(max = 500, message = "Putanja do SDS fajla ne sme biti duža od 500 karaktera.")

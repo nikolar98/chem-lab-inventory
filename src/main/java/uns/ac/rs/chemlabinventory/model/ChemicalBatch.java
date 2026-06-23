@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "chemical_batches", schema = "chem_lab_inventory")
 public class ChemicalBatch {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -59,8 +60,11 @@ public class ChemicalBatch {
     @Column(name = "expiration_date")
     private LocalDate expirationDate;
 
-    @Column(name = "price", precision = 12, scale = 2)
-    private BigDecimal price;
+    @Column(name = "package_price", precision = 12, scale = 2)
+    private BigDecimal packagePrice;
+
+    @Column(name = "total_price", precision = 12, scale = 2)
+    private BigDecimal totalPrice;
 
     @Column(name = "minimum_quantity_alarm", precision = 12, scale = 3)
     private BigDecimal minimumQuantityAlarm;
@@ -76,6 +80,4 @@ public class ChemicalBatch {
     @Size(max = 500)
     @Column(name = "note", length = 500)
     private String note;
-
-
 }

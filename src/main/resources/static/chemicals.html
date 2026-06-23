@@ -303,7 +303,7 @@
         <a href="/chemicals.html" class="active">Hemikalije</a>
         <a href="/potrosnja.html">Potrošnja</a>
         <a href="/users.html" class="admin-only">Korisnici</a>
-        <a href="/izvestaji.html">Izveštaji</a>
+        <a href="/reports.html">Izveštaji</a>
         <a href="/alerts.html">Upozorenja</a>
         <a href="/requests.html" class="admin-only">Zahtevi</a>
     </nav>
@@ -774,9 +774,12 @@
         batches.forEach(batch => {
             const locationName = normalizeLocation(batch.locationName);
             const responsible = getResponsiblePerson(batch);
-            const price = Number(batch.price || 0);
             const purchasedQuantity = Number(batch.purchasedQuantity || 0);
-            const totalPrice = price > 0 && purchasedQuantity > 0 ? price * purchasedQuantity : null;
+            const packagePrice = Number(batch.packagePrice ?? batch.price ?? 0);
+            const totalPriceFromDb = Number(batch.totalPrice ?? 0);
+            const totalPrice = totalPriceFromDb > 0
+                ? totalPriceFromDb
+                : (packagePrice > 0 && purchasedQuantity > 0 ? packagePrice * purchasedQuantity : 0);
 
             tbody.innerHTML += `
                 <tr data-location="${locationName}" data-status="${getStatus(batch)}">
@@ -788,8 +791,8 @@
                     <td><strong>${formatNumber(batch.totalQuantity)} ${valueOrDash(batch.packageUnit)}</strong></td>
                     <td>${locationName}</td>
                     <td>${responsible}</td>
-                    <td>${price > 0 ? formatCurrency(price) : "—"}</td>
-                    <td><strong>${totalPrice !== null ? formatCurrency(totalPrice) : "—"}</strong></td>
+                    <td>${packagePrice > 0 ? formatCurrency(packagePrice) : "—"}</td>
+                    <td><strong>${totalPrice > 0 ? formatCurrency(totalPrice) : "—"}</strong></td>
                     <td>${formatNote(batch.note)}</td>
                 </tr>
             `;
@@ -1020,7 +1023,7 @@
             return res.json();
         };
 
-        // Dodat API poziv za korisnike
+
         Promise.all([
             fetchJson('/api/chemicals'),
             fetchJson('/api/manufacturers'),
@@ -1031,28 +1034,25 @@
             existingManufacturers = manufacturers;
             existingLocations = locations;
 
-            // 1. Datalist za hemikalije
             const chemList = document.getElementById('chemNameList');
             chemList.innerHTML = '';
             chemicals.forEach(c => {
                 chemList.innerHTML += `<option value="${c.name}">`;
             });
 
-            // 2. Select za proizvođače
             const manSelect = document.getElementById('formManufacturer');
             manSelect.innerHTML = '<option value="">Izaberi proizvođača...</option>';
             manufacturers.forEach(m => {
                 manSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
             });
 
-            // 3. Select za lokacije
+
             const locSelect = document.getElementById('formLocation');
             locSelect.innerHTML = '<option value="">Izaberi lokaciju...</option>';
             locations.forEach(l => {
                 locSelect.innerHTML += `<option value="${l.id}">${l.name}</option>`;
             });
 
-            // 4. Select za zadužene osobe (NOVO)
             const userSelect = document.getElementById('formResponsibleUser');
             userSelect.innerHTML = '<option value="">Bez zadužene osobe</option>';
             users.forEach(u => {
@@ -1086,9 +1086,10 @@
         const packageSize = parseFloat(document.getElementById('formPackageSize').value);
         const packageUnit = document.getElementById('formPackageUnit').value;
         const quantity = parseInt(document.getElementById('formQuantity').value);
-        const price = parseFloat(document.getElementById('formPrice').value) || null;
+        const packagePrice = parseFloat(document.getElementById('formPrice').value) || null;
 
         const totalQty = packageSize * quantity;
+        const totalPrice = packagePrice ? packagePrice * quantity : null;
 
         try {
             let chemical = existingChemicals.find(c => c.name.toLowerCase() === name.toLowerCase());
@@ -1119,7 +1120,8 @@
                 purchasedQuantity: quantity,
                 totalQuantity: totalQty,
                 currentQuantity: totalQty,
-                price: price
+                packagePrice: packagePrice,
+                totalPrice: totalPrice
             };
 
             const batchResponse = await fetch('/api/chemical-batches', {
