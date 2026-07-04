@@ -254,6 +254,10 @@
             display: none;
         }
 
+        .user-only {
+            display: none;
+        }
+
         @media(max-width: 1000px) {
             .stats,
             .cards,
@@ -278,6 +282,11 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .user-only {
+            display: none;
+        }
+
     </style>
 </head>
 
@@ -300,6 +309,7 @@
         <a href="/users.html" class="admin-only"> Korisnici </a>
         <a href="/reports.html"> Izveštaji </a>
         <a href="/alerts.html"> Upozorenja </a>
+        <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
         <a href="/requests.html" class="admin-only">Zahtevi</a>
     </nav>
 
@@ -488,12 +498,30 @@
         .then(user => {
             document.getElementById("userEmail").textContent = user.email;
 
-            if (user.role !== "ADMIN") {
+            if (user.role === "ADMIN") {
+
+                document.querySelectorAll(".admin-only").forEach(element => {
+                    element.style.display = "block";
+                });
+
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "none";
+                });
+
+            } else {
+
                 document.querySelectorAll(".admin-only").forEach(element => {
                     element.style.display = "none";
                 });
+
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "block";
+                });
+
             }
         });
+
+
 </script>
 
 </body>

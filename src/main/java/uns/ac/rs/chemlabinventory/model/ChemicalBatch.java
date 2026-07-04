@@ -80,4 +80,7 @@ public class ChemicalBatch {
     @Size(max = 500)
     @Column(name = "note", length = 500)
     private String note;
+
+    @Column(nullable = false)
+    private Boolean opened = false;
 }

@@ -163,3 +163,24 @@ SELECT
     purchased_quantity,
     total_price
 FROM chemical_batches;
+
+
+
+-----sprint 03-----
+
+ALTER TABLE chemical_batches
+    ADD COLUMN opened BOOLEAN DEFAULT FALSE;
+
+---
+ALTER TABLE requests
+    ADD COLUMN chemical_batch_id BIGINT,
+ADD COLUMN requested_quantity DECIMAL(12,3),
+ADD COLUMN purpose VARCHAR(255);
+
+ALTER TABLE requests
+    ADD CONSTRAINT fk_requests_chemical_batch
+        FOREIGN KEY (chemical_batch_id) REFERENCES chemical_batches(id);
+---
+
+ALTER TABLE consumptions
+    ADD COLUMN purpose VARCHAR(100);

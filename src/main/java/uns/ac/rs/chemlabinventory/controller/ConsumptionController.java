@@ -26,6 +26,11 @@ public class ConsumptionController {
         return consumptionService.findById(id);
     }
 
+    @GetMapping("/batch/{batchId}")
+    public List<Consumption> findByChemicalBatch(@PathVariable Long batchId) {
+        return consumptionService.findByChemicalBatchId(batchId);
+    }
+
     @PostMapping
     public Consumption save(@RequestBody Consumption consumption) {
         return consumptionService.save(consumption);

@@ -46,5 +46,9 @@ public class Consumption {
     @Column(name = "note", length = 500)
     private String note;
 
+    @Size(max = 100)
+    @Column(name = "purpose", length = 100)
+    private String purpose;
+
 
 }

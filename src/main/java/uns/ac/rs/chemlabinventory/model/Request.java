@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -57,6 +58,14 @@ public class Request {
             createdAt = LocalDateTime.now();
         }
     }
+    @Column(name = "chemical_batch_id")
+    private Long chemicalBatchId;
+
+    @Column(name = "requested_quantity", precision = 12, scale = 3)
+    private BigDecimal requestedQuantity;
+
+    @Column(name = "purpose", length = 255)
+    private String purpose;
 
 
 }

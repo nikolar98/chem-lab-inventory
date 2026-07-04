@@ -26,6 +26,9 @@ public class ChemicalBatchDTO {
     private String locationName;
     private String responsibleUserFullName;
 
+    private LocalDate lastUsageDate;
+    private Long lastUsageId;
+
     @Size(max = 100, message = "Čistoća ne sme biti duža od 100 karaktera.")
     private String purity;
 
@@ -46,6 +49,8 @@ public class ChemicalBatchDTO {
     private BigDecimal totalPrice;
 
     private BigDecimal minimumQuantityAlarm;
+
+    private boolean opened;
 
     @Size(max = 500, message = "Putanja do SDS fajla ne sme biti duža od 500 karaktera.")
     private String sdsFilePath;

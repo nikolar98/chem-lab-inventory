@@ -2,6 +2,7 @@ package uns.ac.rs.chemlabinventory.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
@@ -33,6 +34,10 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**"
                         ).permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/requests/chemical-usage").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/requests/my").authenticated()
+                        .requestMatchers("/my-requests.html").authenticated()
 
                         .requestMatchers(
                                 "/requests.html",

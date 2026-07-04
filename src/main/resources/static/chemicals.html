@@ -283,6 +283,10 @@
         .admin-only {
             display: none;
         }
+
+        .user-only {
+            display: none;
+        }
     </style>
 </head>
 
@@ -305,6 +309,7 @@
         <a href="/users.html" class="admin-only">Korisnici</a>
         <a href="/reports.html">Izveštaji</a>
         <a href="/alerts.html">Upozorenja</a>
+        <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
         <a href="/requests.html" class="admin-only">Zahtevi</a>
     </nav>
 
@@ -357,6 +362,7 @@
             <div class="view-tabs">
                 <button class="view-tab active" data-view="summary">TRENUTNO STANJE - ukupna količina hemikalije iste čistoće</button>
                 <button class="view-tab" data-view="details">Detaljna evidencija</button>
+                <button class="view-tab" data-view="opened">Otvorene hemikalije</button>
                 <button class="view-tab" data-view="prices">Evidencija cena</button>
             </div>
 
@@ -410,14 +416,30 @@
                         <th class="sortable" onclick="sortTable('chemicalsTableBody', 3, 'number', this)">Pakovanje <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('chemicalsTableBody', 4, 'number', this)">Količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('chemicalsTableBody', 5, 'number', this)">Ukupna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 6, 'number', this)">Trenutna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 7, 'text', this)">Lokacija <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 8, 'text', this)">Zadužena osoba <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th>Napomena</th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 6, 'text', this)">Lokacija <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('chemicalsTableBody', 7, 'text', this)">Zadužena osoba <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th>Akcije</th>
+                        <th>Napomena</th>
                     </tr>
                     </thead>
                     <tbody id="chemicalsTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="table-scroll-container d-none" id="openedView">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortTable('openedTableBody', 0, 'text', this)">Naziv hemikalije <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('openedTableBody', 1, 'text', this)">Proizvođač <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('openedTableBody', 2, 'text', this)">Čistoća <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('openedTableBody', 3, 'number', this)">Trenutna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th>Akcije</th>
+                        <th>Istorija zaduženja</th>
+                        <th class="sortable" onclick="sortTable('openedTableBody', 6, 'text', this)">Lokacija <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    </tr>
+                    </thead>
+                    <tbody id="openedTableBody"></tbody>
                 </table>
             </div>
 
@@ -550,7 +572,145 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="editQuantityModal" tabindex="-1" aria-labelledby="editQuantityModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="editQuantityModalLabel">Izmeni hemikaliju</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editQuantityForm">
+                        <input type="hidden" id="editBatchId">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Naziv hemikalije</label>
+                            <input type="text" class="form-control" id="editChemicalName" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Trenutna količina</label>
+                            <div class="input-group">
+                                <input type="number" step="0.001" min="0" class="form-control" id="editCurrentQuantity" required>
+                                <span class="input-group-text" id="editUnit">—</span>
+                            </div>
+                            <small class="text-muted">Ako se količina smanji, hemikalija će automatski biti prebačena u otvorene hemikalije.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Napomena</label>
+                            <textarea class="form-control" id="editNote" rows="3" placeholder="Unesi napomenu..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Odustani</button>
+                    <button type="button" class="btn btn-primary-custom text-white" onclick="submitQuantityEdit()">Sačuvaj izmene</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="requestChemicalModal" tabindex="-1" aria-labelledby="requestChemicalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="requestChemicalModalLabel">Pošalji zahtev za hemikaliju</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="requestChemicalForm">
+                        <input type="hidden" id="requestBatchId">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Hemikalija</label>
+                            <input type="text" class="form-control" id="requestChemicalName" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Dostupno</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="requestAvailableQuantity" readonly>
+                                <span class="input-group-text" id="requestAvailableUnit">—</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Količina koju tražim *</label>
+                            <div class="input-group">
+                                <input type="number" step="0.001" min="0.001" class="form-control" id="requestQuantity" required>
+                                <span class="input-group-text" id="requestUnitText">—</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Svrha potrošnje *</label>
+                            <select class="form-select" id="requestPurpose" required>
+                                <option value="">Izaberi svrhu...</option>
+                                <option value="Laboratorija">Laboratorija</option>
+                                <option value="Nastava">Nastava</option>
+                                <option value="Projekat">Projekat</option>
+                                <option value="Istraživanje">Istraživanje</option>
+                                <option value="Drugo">Drugo</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Napomena</label>
+                            <textarea class="form-control" id="requestNote" rows="3" placeholder="Unesi dodatnu napomenu..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Odustani</button>
+                    <button type="button" class="btn btn-primary-custom text-white" onclick="submitChemicalRequest()">Pošalji zahtev</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+</div>
+
+
+<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="historyModalLabel">Istorija zaduženja</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>Hemikalija:</strong> <span id="historyChemicalName">—</span><br>
+                    <strong>Lokacija:</strong> <span id="historyLocation">—</span><br>
+                    <strong>Trenutna količina:</strong> <span id="historyCurrentQuantity">—</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Korisnik</th>
+                            <th>Količina</th>
+                            <th>Svrha</th>
+                            <th>Napomena</th>
+                        </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zatvori</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -560,6 +720,7 @@
     let currentPage = 1;
     let sortDirections = {};
     let selectedLocation = "all";
+    let currentUserIsAdmin = false;
 
     const searchInput = document.getElementById("searchInput");
     const rowsPerPageSelect = document.getElementById("rowsPerPageSelect");
@@ -583,14 +744,31 @@
             const roleName = user.role.name || user.role;
             const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
 
+            currentUserIsAdmin = isAdmin;
+
             if (isAdmin) {
+
                 document.querySelectorAll(".admin-only").forEach(element => {
                     element.classList.remove("admin-only");
                 });
+
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "none";
+                });
+
+                renderAllTables();
+                applyFilters();
+
             } else {
+
                 document.querySelectorAll(".admin-only").forEach(element => {
                     element.style.display = "none";
                 });
+
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "block";
+                });
+
             }
         })
         .catch(error => console.error("Greška pri proveri uloge korisnika:", error));
@@ -607,7 +785,7 @@
             .catch(() => {
                 document.getElementById("chemicalsTableBody").innerHTML = `
                     <tr>
-                        <td colspan="11" class="text-center text-danger">
+                        <td colspan="10" class="text-center text-danger">
                             Greška pri učitavanju hemikalija iz baze.
                         </td>
                     </tr>
@@ -651,9 +829,24 @@
     }
 
     function renderAllTables() {
-        renderDetailsTable(allBatches);
-        renderSummaryTable(allBatches);
-        renderPricesTable(allBatches);
+        const unopenedBatches = allBatches.filter(batch => !batch.opened);
+        const openedBatches = allBatches
+            .filter(batch => batch.opened)
+            .sort((a, b) => {
+                const aLast = Number(a.lastUsageId || 0);
+                const bLast = Number(b.lastUsageId || 0);
+
+                if (aLast !== bLast) {
+                    return bLast - aLast;
+                }
+
+                return Number(b.id) - Number(a.id);
+            });
+
+        renderDetailsTable(unopenedBatches);
+        renderSummaryTable(unopenedBatches);
+        renderOpenedTable(openedBatches);
+        renderPricesTable(unopenedBatches);
     }
 
     function renderDetailsTable(batches) {
@@ -669,23 +862,25 @@
                     <td>${valueOrDash(batch.chemicalName)}</td>
                     <td>${valueOrDash(batch.manufacturerName)}</td>
                     <td>${valueOrDash(batch.purity)}</td>
-                    <td>${formatNumber(batch.packageSize)} ${valueOrDash(batch.packageUnit)}</td>
+                    <td>${formatNumber(batch.packageSize)} ${normalizeUnit(batch.packageUnit)}</td>
                     <td>${valueOrDash(batch.purchasedQuantity)}</td>
-                    <td><strong>${formatNumber(batch.totalQuantity)} ${valueOrDash(batch.packageUnit)}</strong></td>
-                    <td><strong>${formatNumber(batch.currentQuantity)} ${valueOrDash(batch.packageUnit)}</strong></td>
+                    <td><strong>${formatNumber(batch.totalQuantity)} ${normalizeUnit(batch.packageUnit)}</strong></td>
                     <td>${locationName}</td>
                     <td>${responsible}</td>
-                    <td>${formatNote(batch.note)}</td>
                     <td>
-                        <div class="d-flex gap-2 justify-content-center">
-                            <button class="btn btn-outline-secondary action-btn" title="Detalji">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary action-btn admin-only" title="Izmeni">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                        </div>
+                        ${currentUserIsAdmin ? `
+    <button class="btn btn-sm btn-primary-custom text-white"
+            onclick="openEditModal(${batch.id})">
+        Izmeni
+    </button>
+` : `
+    <button class="btn btn-sm btn-outline-primary"
+            onclick="openRequestModal(${batch.id})">
+        Pošalji zahtev
+    </button>
+`}
                     </td>
+                    <td>${formatNote(batch.note)}</td>
                 </tr>
             `;
         });
@@ -725,6 +920,57 @@
         });
     }
 
+    function renderOpenedTable(batches) {
+        const tbody = document.getElementById("openedTableBody");
+        tbody.innerHTML = "";
+
+        if (batches.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-muted">
+                        Trenutno nema otvorenih hemikalija.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        batches.forEach(batch => {
+            const locationName = normalizeLocation(batch.locationName);
+
+            tbody.innerHTML += `
+                <tr data-location="${locationName}" data-status="${getStatus(batch)}">
+                    <td>${valueOrDash(batch.chemicalName)}</td>
+                    <td>${valueOrDash(batch.manufacturerName)}</td>
+                    <td>${valueOrDash(batch.purity)}</td>
+                    <td><strong>${formatNumber(batch.currentQuantity)} ${normalizeUnit(batch.packageUnit)}</strong></td>
+                    <td>
+    ${currentUserIsAdmin ? `
+        <button class="btn btn-sm btn-primary-custom text-white"
+                onclick="openEditModal(${batch.id})">
+            Zaduži
+        </button>
+    ` : `
+        <button class="btn btn-sm btn-outline-primary"
+                onclick="openRequestModal(${batch.id})">
+            Pošalji zahtev
+        </button>
+    `}
+</td>
+
+<td>
+    <button class="btn btn-sm btn-outline-secondary"
+            onclick="showHistory(${batch.id})">
+        Prikaži
+    </button>
+</td>
+
+<td>${locationName}</td>
+                </tr>
+            `;
+        });
+    }
+
     function renderPricesTable(batches) {
         const tbody = document.getElementById("pricesTableBody");
         tbody.innerHTML = "";
@@ -744,9 +990,9 @@
                     <td>${valueOrDash(batch.chemicalName)}</td>
                     <td>${valueOrDash(batch.manufacturerName)}</td>
                     <td>${valueOrDash(batch.purity)}</td>
-                    <td>${formatNumber(batch.packageSize)} ${valueOrDash(batch.packageUnit)}</td>
+                    <td>${formatNumber(batch.packageSize)} ${normalizeUnit(batch.packageUnit)}</td>
                     <td>${valueOrDash(batch.purchasedQuantity)}</td>
-                    <td><strong>${formatNumber(batch.totalQuantity)} ${valueOrDash(batch.packageUnit)}</strong></td>
+                    <td><strong>${formatNumber(batch.totalQuantity)} ${normalizeUnit(batch.packageUnit)}</strong></td>
                     <td>${locationName}</td>
                     <td>${responsible}</td>
                     <td>${packagePrice > 0 ? formatCurrency(packagePrice) : "—"}</td>
@@ -760,15 +1006,19 @@
     function showCurrentView() {
         document.getElementById("summaryView").classList.add("d-none");
         document.getElementById("detailsView").classList.add("d-none");
+        document.getElementById("openedView").classList.add("d-none");
         document.getElementById("pricesView").classList.add("d-none");
 
-        document.getElementById("locationTabsBlock").style.display = currentView === "details" || currentView === "prices" ? "flex" : "none";
+        document.getElementById("locationTabsBlock").style.display = currentView === "details" || currentView === "opened" || currentView === "prices" ? "flex" : "none";
 
         if (currentView === "summary") {
             document.getElementById("summaryView").classList.remove("d-none");
             document.getElementById("summaryDescription").style.display = "block";
         } else if (currentView === "details") {
             document.getElementById("detailsView").classList.remove("d-none");
+            document.getElementById("summaryDescription").style.display = "none";
+        } else if (currentView === "opened") {
+            document.getElementById("openedView").classList.remove("d-none");
             document.getElementById("summaryDescription").style.display = "none";
         } else if (currentView === "prices") {
             document.getElementById("pricesView").classList.remove("d-none");
@@ -878,6 +1128,7 @@
 
     function getCurrentTbodyId() {
         if (currentView === "details") return "chemicalsTableBody";
+        if (currentView === "opened") return "openedTableBody";
         if (currentView === "prices") return "pricesTableBody";
         return "summaryTableBody";
     }
@@ -1026,6 +1277,230 @@
         });
     }
 
+    function openEditModal(batchId) {
+        const batch = allBatches.find(item => Number(item.id) === Number(batchId));
+
+        if (!batch) {
+            alert("Hemikalija nije pronađena u učitanim podacima.");
+            return;
+        }
+
+        document.getElementById("editBatchId").value = batch.id;
+        document.getElementById("editChemicalName").value = batch.chemicalName || "—";
+        document.getElementById("editCurrentQuantity").value = batch.currentQuantity ?? 0;
+        document.getElementById("editUnit").textContent =
+            batch.packageUnit ? normalizeUnit(batch.packageUnit) : "—";
+        document.getElementById("editNote").value = batch.note || "";
+
+        const modal = new bootstrap.Modal(document.getElementById("editQuantityModal"));
+        modal.show();
+    }
+
+    async function submitQuantityEdit() {
+        const form = document.getElementById("editQuantityForm");
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const batchId = document.getElementById("editBatchId").value;
+        const currentQuantity = parseFloat(document.getElementById("editCurrentQuantity").value);
+        const note = document.getElementById("editNote").value.trim();
+
+        if (Number.isNaN(currentQuantity) || currentQuantity < 0) {
+            alert("Trenutna količina mora biti broj veći ili jednak nuli.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/chemical-batches/${batchId}/quantity`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    currentQuantity: currentQuantity,
+                    note: note
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error("Greška pri izmeni trenutne količine.");
+            }
+
+            const updatedBatch = await response.json();
+
+            bootstrap.Modal.getInstance(document.getElementById("editQuantityModal")).hide();
+            await loadChemicalBatches();
+
+            if (updatedBatch.opened) {
+                currentView = "opened";
+                document.querySelectorAll(".view-tab").forEach(tab => {
+                    tab.classList.toggle("active", tab.dataset.view === "opened");
+                });
+                showCurrentView();
+                applyFilters();
+            }
+
+            alert("Izmene su uspešno sačuvane.");
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        }
+    }
+
+
+
+    function openRequestModal(batchId) {
+        const batch = allBatches.find(item => Number(item.id) === Number(batchId));
+
+        if (!batch) {
+            alert("Hemikalija nije pronađena u učitanim podacima.");
+            return;
+        }
+
+        const unit = batch.packageUnit ? normalizeUnit(batch.packageUnit) : "—";
+        const availableQuantity = Number(batch.currentQuantity || 0);
+
+        document.getElementById("requestBatchId").value = batch.id;
+        document.getElementById("requestChemicalName").value = batch.chemicalName || "—";
+        document.getElementById("requestAvailableQuantity").value = formatNumber(availableQuantity);
+        document.getElementById("requestAvailableUnit").textContent = unit;
+        document.getElementById("requestUnitText").textContent = unit;
+        document.getElementById("requestQuantity").value = "";
+        document.getElementById("requestQuantity").max = availableQuantity;
+        document.getElementById("requestPurpose").value = "";
+        document.getElementById("requestNote").value = "";
+
+        const modal = new bootstrap.Modal(document.getElementById("requestChemicalModal"));
+        modal.show();
+    }
+
+    async function submitChemicalRequest() {
+        const form = document.getElementById("requestChemicalForm");
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const batchId = document.getElementById("requestBatchId").value;
+        const requestedQuantity = parseFloat(document.getElementById("requestQuantity").value);
+        const availableQuantity = parseFloat(document.getElementById("requestAvailableQuantity").value);
+        const purpose = document.getElementById("requestPurpose").value;
+        const comment = document.getElementById("requestNote").value.trim();
+
+        if (Number.isNaN(requestedQuantity) || requestedQuantity <= 0) {
+            alert("Količina koju tražiš mora biti veća od nule.");
+            return;
+        }
+
+        if (!Number.isNaN(availableQuantity) && requestedQuantity > availableQuantity) {
+            alert("Tražena količina ne može biti veća od dostupne količine.");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/requests/chemical-usage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chemicalBatchId: Number(batchId),
+                    requestedQuantity: requestedQuantity,
+                    purpose: purpose,
+                    comment: comment
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error("Zahtev nije poslat. Proveri da li je dodat backend endpoint /api/requests/chemical-usage.");
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById("requestChemicalModal")).hide();
+            alert("Zahtev je uspešno poslat administratoru na odobrenje.");
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        }
+    }
+
+    async function showHistory(batchId) {
+        const batch = allBatches.find(item => Number(item.id) === Number(batchId));
+
+        if (!batch) {
+            alert("Hemikalija nije pronađena u učitanim podacima.");
+            return;
+        }
+
+        document.getElementById("historyChemicalName").textContent = batch.chemicalName || "—";
+        document.getElementById("historyLocation").textContent = normalizeLocation(batch.locationName);
+        document.getElementById("historyCurrentQuantity").textContent =
+            `${formatNumber(batch.currentQuantity)} ${normalizeUnit(batch.packageUnit)}`;
+
+        const tbody = document.getElementById("historyTableBody");
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted">
+                    Učitavanje istorije...
+                </td>
+            </tr>
+        `;
+
+        const modal = new bootstrap.Modal(document.getElementById("historyModal"));
+        modal.show();
+
+        try {
+            const response = await fetch(`/api/consumptions/batch/${batchId}`);
+
+            if (!response.ok) {
+                throw new Error("Greška pri učitavanju istorije zaduženja.");
+            }
+
+            const consumptions = await response.json();
+            tbody.innerHTML = "";
+
+            if (!consumptions || consumptions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">
+                            Za ovu hemikaliju još nema evidentiranih zaduženja.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            consumptions.forEach(consumption => {
+                const date = consumption.dateTaken
+                    ? consumption.dateTaken.toString().substring(0, 10)
+                    : "—";
+
+                const userName = consumption.user
+                    ? `${consumption.user.firstName || ""} ${consumption.user.lastName || ""}`.trim()
+                    : "—";
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${date}</td>
+                        <td>${userName || "—"}</td>
+                        <td><strong>${formatNumber(consumption.quantity)} ${normalizeUnit(consumption.unit)}</strong></td>
+                        <td>${valueOrDash(consumption.purpose)}</td>
+                        <td>${valueOrDash(consumption.note)}</td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error(error);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-danger">
+                        ${error.message}
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+
     async function submitChemicalForm() {
         const form = document.getElementById('addChemicalForm');
         if (!form.checkValidity()) {
@@ -1077,7 +1552,8 @@
                 totalQuantity: totalQty,
                 currentQuantity: totalQty,
                 packagePrice: packagePrice,
-                totalPrice: totalPrice
+                totalPrice: totalPrice,
+                opened: false
             };
 
             const batchResponse = await fetch('/api/chemical-batches', {

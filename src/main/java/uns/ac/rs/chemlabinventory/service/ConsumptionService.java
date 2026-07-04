@@ -31,4 +31,8 @@ public class ConsumptionService {
     public void delete(Long id) {
         consumptionRepository.deleteById(id);
     }
+
+    public List<Consumption> findByChemicalBatchId(Long batchId) {
+        return consumptionRepository.findByChemicalBatchIdOrderByDateTakenDesc(batchId);
+    }
 }

@@ -126,6 +126,9 @@
         .admin-only {
             display: none;
         }
+        .user-only {
+            display: none;
+        }
     </style>
 </head>
 
@@ -148,6 +151,7 @@
         <a href="/users.html" class="admin-only">Korisnici</a>
         <a href="/reports.html" class="active">Izveštaji</a>
         <a href="/alerts.html">Upozorenja</a>
+        <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
         <a href="/requests.html" class="admin-only">Zahtevi</a>
     </nav>
 
@@ -226,12 +230,29 @@
 
             document.getElementById("userEmail").textContent = user.email;
 
-            if (user.role === "ADMIN") {
+            const roleName = user.role?.name || user.role;
+
+            if (roleName === "ADMIN" || roleName === "ROLE_ADMIN") {
+
                 document.querySelectorAll(".admin-only").forEach(element => {
                     element.style.display = "block";
                 });
-            }
 
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "none";
+                });
+
+            } else {
+
+                document.querySelectorAll(".admin-only").forEach(element => {
+                    element.style.display = "none";
+                });
+
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "block";
+                });
+
+            }
         });
 
 </script>

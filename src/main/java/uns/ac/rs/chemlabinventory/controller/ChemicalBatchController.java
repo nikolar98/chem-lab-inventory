@@ -5,7 +5,9 @@ import uns.ac.rs.chemlabinventory.dto.ChemicalBatchDTO;
 import uns.ac.rs.chemlabinventory.model.ChemicalBatch;
 import uns.ac.rs.chemlabinventory.service.ChemicalBatchService;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/chemical-batches")
@@ -37,6 +39,16 @@ public class ChemicalBatchController {
                                 @RequestBody ChemicalBatch chemicalBatch) {
         chemicalBatch.setId(id);
         return chemicalBatchService.save(chemicalBatch);
+    }
+
+    @PutMapping("/{id}/quantity")
+    public ChemicalBatch updateQuantity(@PathVariable Long id,
+                                        @RequestBody Map<String, Object> body) {
+
+        BigDecimal currentQuantity = new BigDecimal(body.get("currentQuantity").toString());
+        String note = body.get("note") != null ? body.get("note").toString() : null;
+
+        return chemicalBatchService.updateQuantityAndNote(id, currentQuantity, note);
     }
 
     @DeleteMapping("/{id}")

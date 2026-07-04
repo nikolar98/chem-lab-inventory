@@ -118,21 +118,91 @@
         .table th {
             font-weight: 600;
             vertical-align: middle;
+            white-space: nowrap;
         }
 
         .table td {
             vertical-align: middle;
         }
 
-        .table td:nth-child(4) {
+        .note-cell {
             max-width: 300px;
             color: #6c757d;
             font-size: 0.95rem;
+            white-space: normal;
         }
 
         .admin-only {
             display: none;
         }
+
+        .user-only {
+            display: none;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .section-title i {
+            color: #008b95;
+        }
+
+        .status-box {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            min-width: 150px;
+        }
+
+        .status-approved {
+            background:#d1e7dd;
+            color:#0f5132;
+        }
+
+        .status-rejected {
+            background:#f8d7da;
+            color:#842029;
+        }
+
+        .btn-primary-custom {
+            background: #008b95;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 9px 16px;
+            font-weight: 600;
+        }
+
+        .btn-primary-custom:hover {
+            background: #00757e;
+            color: white;
+        }
+
+        .table-scroll {
+            max-height: 420px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        .table-scroll table {
+            margin-bottom: 0;
+        }
+
+        .table-scroll thead th {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 5;
+        }
+
+
     </style>
 </head>
 
@@ -155,7 +225,8 @@
         <a href="/users.html" class="admin-only"> Korisnici </a>
         <a href="/reports.html"> Izveštaji </a>
         <a href="/alerts.html"> Upozorenja </a>
-        <a href="/requests.html" class="admin-only">Zahtevi</a>
+        <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
+        <a href="/requests.html" class="admin-only active">Zahtevi</a>
     </nav>
 
     <form class="logout" action="/logout" method="post">
@@ -179,21 +250,61 @@
 
     <div class="container-fluid p-4">
 
-        <div class="page-card">
+        <div class="page-card mb-4">
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-
                 <div>
-                    <h2>Lista zahteva</h2>
+                    <div class="section-title">
+                        <i class="bi bi-flask fs-4"></i>
+                        <h2 class="mb-0">Zahtevi za korišćenje hemikalija</h2>
+                    </div>
 
-                    <p class="text-muted">
-                        Pregled svih zahteva koji čekaju odobrenje.
+                    <p class="text-muted mb-0">
+                        Zahtevi korisnika za zaduženje i potrošnju hemikalija.
                     </p>
                 </div>
+            </div>
+
+            <div class="table-responsive table-scroll">
+
+                <table class="table align-middle">
+
+                    <thead>
+                    <tr>
+                        <th>Korisnik</th>
+                        <th>Hemikalija</th>
+                        <th>Tražena količina</th>
+                        <th>Svrha</th>
+                        <th>Vreme slanja</th>
+                        <th>Napomena</th>
+                        <th>Akcije</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="chemicalRequestsTableBody"></tbody>
+
+                </table>
 
             </div>
 
-            <div class="table-responsive">
+        </div>
+
+        <div class="page-card">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <div class="section-title">
+                        <i class="bi bi-person-plus fs-4"></i>
+                        <h2 class="mb-0">Zahtevi za kreiranje naloga</h2>
+                    </div>
+
+                    <p class="text-muted mb-0">
+                        Pregled zahteva za registraciju novih korisnika.
+                    </p>
+                </div>
+            </div>
+
+            <div class="table-responsive table-scroll">
 
                 <table class="table align-middle">
 
@@ -207,8 +318,7 @@
                     </tr>
                     </thead>
 
-                    <tbody id="requestsTableBody">
-                    </tbody>
+                    <tbody id="accountRequestsTableBody"></tbody>
 
                 </table>
 
@@ -227,76 +337,128 @@
         document.getElementById("userEmail").textContent = email;
     }
 
-    fetch("/api/requests")
-        .then(response => response.json())
-        .then(requests => {
-            const tbody = document.getElementById("requestsTableBody");
+    let chemicalBatchesById = new Map();
 
-            tbody.innerHTML = "";
+    loadPageData();
 
-            if (requests.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">
-                            Trenutno nema zahteva za prikaz.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
+    function loadPageData() {
+        Promise.all([
+            fetch("/api/requests").then(response => response.json()),
+            fetch("/api/chemical-batches").then(response => response.json()).catch(() => [])
+        ])
+            .then(([requests, chemicalBatches]) => {
+                chemicalBatchesById = new Map(
+                    chemicalBatches.map(batch => [Number(batch.id), batch])
+                );
 
-            requests.forEach(request => {
-                const createdAt = request.createdAt
-                    ? request.createdAt.replace("T", " ").substring(0, 16)
-                    : "—";
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${formatRequestType(request.type)}</td>
-
-                        <td>
-                            ${request.fullName || "—"}<br>
-                            <small class="text-muted">${request.email || ""}</small>
-                        </td>
-
-                        <td>${createdAt}</td>
-
-                        <td>${request.comment || "—"}</td>
-
-                        <td id="actions-${request.id}">
-                            ${renderActions(request)}
-                        </td>
-                    </tr>
-                `;
+                renderRequests(requests);
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById("chemicalRequestsTableBody").innerHTML = emptyRow(7, "Greška pri učitavanju zahteva.");
+                document.getElementById("accountRequestsTableBody").innerHTML = emptyRow(5, "Greška pri učitavanju zahteva.");
             });
+    }
+
+    function renderRequests(requests) {
+        const sortedRequests = requests.sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
         });
+
+        const chemicalRequests = sortedRequests.filter(request => request.type === "CHEMICAL_USAGE");
+        const accountRequests = sortedRequests.filter(request => request.type === "ACCOUNT_REGISTRATION");
+
+        renderChemicalRequests(chemicalRequests);
+        renderAccountRequests(accountRequests);
+    }
+
+    function renderChemicalRequests(requests) {
+        const tbody = document.getElementById("chemicalRequestsTableBody");
+        tbody.innerHTML = "";
+
+        if (requests.length === 0) {
+            tbody.innerHTML = emptyRow(7, "Trenutno nema zahteva za korišćenje hemikalija.");
+            return;
+        }
+
+        requests.forEach(request => {
+            const createdAt = formatDateTime(request.createdAt);
+            const batch = chemicalBatchesById.get(Number(request.chemicalBatchId));
+            const unit = batch && batch.packageUnit ? normalizeUnit(batch.packageUnit) : "";
+            const chemicalName = batch ? batch.chemicalName : `Zaliha ID: ${request.chemicalBatchId || "—"}`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        ${request.fullName || "—"}<br>
+                        <small class="text-muted">${request.email || ""}</small>
+                    </td>
+
+                    <td>${chemicalName}</td>
+
+                    <td>
+                        <strong>${formatNumber(request.requestedQuantity)} ${unit}</strong>
+                    </td>
+
+                    <td>${request.purpose || "—"}</td>
+
+                    <td>${createdAt}</td>
+
+                    <td class="note-cell">${request.comment || "—"}</td>
+
+                    <td id="actions-${request.id}">
+                        ${renderActions(request)}
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function renderAccountRequests(requests) {
+        const tbody = document.getElementById("accountRequestsTableBody");
+        tbody.innerHTML = "";
+
+        if (requests.length === 0) {
+            tbody.innerHTML = emptyRow(5, "Trenutno nema zahteva za kreiranje naloga.");
+            return;
+        }
+
+        requests.forEach(request => {
+            const createdAt = formatDateTime(request.createdAt);
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${formatRequestType(request.type)}</td>
+
+                    <td>
+                        ${request.fullName || "—"}<br>
+                        <small class="text-muted">${request.email || ""}</small>
+                    </td>
+
+                    <td>${createdAt}</td>
+
+                    <td class="note-cell">${request.comment || "—"}</td>
+
+                    <td id="actions-${request.id}">
+                        ${renderActions(request)}
+                    </td>
+                </tr>
+            `;
+        });
+    }
 
     function renderActions(request) {
         if (request.status === "APPROVED") {
             return `
-                <div style="
-                    background:#d1e7dd;
-                    color:#0f5132;
-                    padding:10px 14px;
-                    border-radius:8px;
-                    font-weight:600;
-                    text-align:center;
-                ">
-                    Nalog je uspešno kreiran
+                <div class="status-box status-approved">
+                    ${request.type === "ACCOUNT_REGISTRATION" ? "Nalog je uspešno kreiran" : "Zahtev je odobren"}
                 </div>
             `;
         }
 
         if (request.status === "REJECTED") {
             return `
-                <div style="
-                    background:#f8d7da;
-                    color:#842029;
-                    padding:10px 14px;
-                    border-radius:8px;
-                    font-weight:600;
-                    text-align:center;
-                ">
+                <div class="status-box status-rejected">
                     Zahtev je odbijen
                 </div>
             `;
@@ -304,7 +466,7 @@
 
         return `
             <div class="d-flex gap-2">
-                <button class="btn btn-success" onclick="approveRequest(${request.id})">
+                <button class="btn btn-success" onclick="approveRequest(${request.id}, '${request.type}')">
                     <i class="bi bi-check-circle"></i>
                     Prihvati
                 </button>
@@ -317,26 +479,21 @@
         `;
     }
 
-    function approveRequest(id) {
+    function approveRequest(id, type) {
         fetch(`/api/requests/${id}/approve`, {
             method: "POST"
         })
             .then(response => {
                 if (response.ok) {
                     document.getElementById(`actions-${id}`).innerHTML = `
-                        <div style="
-                            background:#d1e7dd;
-                            color:#0f5132;
-                            padding:10px 14px;
-                            border-radius:8px;
-                            font-weight:600;
-                            text-align:center;
-                        ">
-                            Nalog je uspešno kreiran
+                        <div class="status-box status-approved">
+                            ${type === "ACCOUNT_REGISTRATION" ? "Nalog je uspešno kreiran" : "Zahtev je odobren"}
                         </div>
                     `;
                 } else {
-                    alert("Greška prilikom kreiranja naloga.");
+                    alert(type === "ACCOUNT_REGISTRATION"
+                        ? "Greška prilikom kreiranja naloga."
+                        : "Greška prilikom odobravanja zahteva za hemikaliju.");
                 }
             });
     }
@@ -348,14 +505,7 @@
             .then(response => {
                 if (response.ok) {
                     document.getElementById(`actions-${id}`).innerHTML = `
-                        <div style="
-                            background:#f8d7da;
-                            color:#842029;
-                            padding:10px 14px;
-                            border-radius:8px;
-                            font-weight:600;
-                            text-align:center;
-                        ">
+                        <div class="status-box status-rejected">
                             Zahtev je odbijen
                         </div>
                     `;
@@ -368,6 +518,10 @@
     function formatRequestType(type) {
         if (type === "ACCOUNT_REGISTRATION") {
             return "Registracija novog korisnika";
+        }
+
+        if (type === "CHEMICAL_USAGE") {
+            return "Korišćenje hemikalije";
         }
 
         if (type === "ADD_CHEMICAL") {
@@ -389,18 +543,70 @@
         return type;
     }
 
+    function formatDateTime(value) {
+        return value ? value.replace("T", " ").substring(0, 16) : "—";
+    }
+
+    function emptyRow(colspan, message) {
+        return `
+            <tr>
+                <td colspan="${colspan}" class="text-center text-muted">
+                    ${message}
+                </td>
+            </tr>
+        `;
+    }
+
+    function normalizeUnit(unit) {
+        if (!unit) return "";
+
+        const normalized = unit.toString().trim().toLowerCase();
+
+        if (["l", "lit", "litar", "litri", "liter", "liters"].includes(normalized)) return "L";
+        if (["ml", "mililitar", "mililitri", "milliliter", "milliliters"].includes(normalized)) return "ml";
+        if (["g", "gram", "grami", "grams"].includes(normalized)) return "g";
+
+        return unit;
+    }
+
+    function formatNumber(value) {
+        if (value === null || value === undefined || value === "") return "—";
+
+        const number = Number(value);
+        if (Number.isNaN(number)) return value;
+
+        return Number.isInteger(number) ? number.toString() : number.toString();
+    }
     fetch("/api/current-user")
         .then(response => response.json())
         .then(user => {
+
             document.getElementById("userEmail").textContent = user.email;
 
-            if (user.role === "ADMIN") {
+            const roleName = user.role?.name || user.role;
+
+            if (roleName === "ADMIN" || roleName === "ROLE_ADMIN") {
+
                 document.querySelectorAll(".admin-only").forEach(element => {
                     element.style.display = "block";
                 });
+
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "none";
+                });
+
+            } else {
+
+                document.querySelectorAll(".admin-only").forEach(element => {
+                    element.style.display = "none";
+                });
+
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "block";
+                });
+
             }
         });
-
 </script>
 
 </body>

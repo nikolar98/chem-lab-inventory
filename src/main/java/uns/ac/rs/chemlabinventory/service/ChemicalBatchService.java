@@ -4,16 +4,20 @@ import org.springframework.stereotype.Service;
 import uns.ac.rs.chemlabinventory.dto.ChemicalBatchDTO;
 import uns.ac.rs.chemlabinventory.model.ChemicalBatch;
 import uns.ac.rs.chemlabinventory.repository.ChemicalBatchRepository;
+import uns.ac.rs.chemlabinventory.repository.ConsumptionRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 public class ChemicalBatchService {
 
     private final ChemicalBatchRepository chemicalBatchRepository;
+    private final ConsumptionRepository consumptionRepository;
 
-    public ChemicalBatchService(ChemicalBatchRepository chemicalBatchRepository) {
+    public ChemicalBatchService(ChemicalBatchRepository chemicalBatchRepository, ConsumptionRepository consumptionRepository) {
         this.chemicalBatchRepository = chemicalBatchRepository;
+        this.consumptionRepository = consumptionRepository;
     }
 
     public ChemicalBatch findById(Long id) {
@@ -36,10 +40,33 @@ public class ChemicalBatchService {
                 .toList();
     }
 
+    public ChemicalBatch updateQuantityAndNote(Long id, BigDecimal newQuantity, String note) {
+        ChemicalBatch batch = findById(id);
+
+        BigDecimal oldQuantity = batch.getCurrentQuantity();
+
+        batch.setCurrentQuantity(newQuantity);
+        batch.setNote(note);
+
+        if (oldQuantity != null && newQuantity != null && newQuantity.compareTo(oldQuantity) < 0) {
+            batch.setOpened(true);
+        }
+
+        return chemicalBatchRepository.save(batch);
+    }
+
     private ChemicalBatchDTO toDto(ChemicalBatch batch) {
         ChemicalBatchDTO dto = new ChemicalBatchDTO();
 
         dto.setId(batch.getId());
+
+        dto.setOpened(batch.getOpened());
+
+        consumptionRepository.findFirstByChemicalBatchIdOrderByIdDesc(batch.getId())
+                .ifPresent(consumption -> {
+                    dto.setLastUsageDate(consumption.getDateTaken());
+                    dto.setLastUsageId(consumption.getId());
+                });
 
         dto.setChemicalId(batch.getChemical().getId());
         dto.setChemicalName(batch.getChemical().getName());
