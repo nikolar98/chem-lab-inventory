@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -40,7 +40,7 @@ public class Consumption {
 
     @NotNull
     @Column(name = "date_taken", nullable = false)
-    private LocalDate dateTaken;
+    private LocalDateTime dateTaken;
 
     @Size(max = 500)
     @Column(name = "note", length = 500)

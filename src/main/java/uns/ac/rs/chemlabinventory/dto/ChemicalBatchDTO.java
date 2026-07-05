@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,7 +27,7 @@ public class ChemicalBatchDTO {
     private String locationName;
     private String responsibleUserFullName;
 
-    private LocalDate lastUsageDate;
+    private LocalDateTime lastUsageDate;
     private Long lastUsageId;
 
     @Size(max = 100, message = "Čistoća ne sme biti duža od 100 karaktera.")

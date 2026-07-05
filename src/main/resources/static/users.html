@@ -231,6 +231,19 @@
             align-items: center;
             justify-content: center;
         }
+
+        .sidebar-nav {
+            visibility: hidden;
+        }
+
+        .sidebar-nav.ready {
+            visibility: visible;
+        }
+
+        .admin-only{
+            display: none;
+        }
+
     </style>
 </head>
 
@@ -482,18 +495,31 @@
         .then(user => {
             document.getElementById("userEmail").textContent = user.email;
 
-            const roleName = user.role.name || user.role;
+            const roleName = user.role?.name || user.role;
             const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
 
             if (isAdmin) {
+
                 document.querySelectorAll(".admin-only").forEach(element => {
-                    element.classList.remove("admin-only");
+                    element.style.display = "";
                 });
+
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "none";
+                });
+
             } else {
+
                 document.querySelectorAll(".admin-only").forEach(element => {
                     element.style.display = "none";
                 });
+
+                document.querySelectorAll(".user-only").forEach(element => {
+                    element.style.display = "";
+                });
+
             }
+            document.querySelector(".sidebar-nav").classList.add("ready");
         })
         .catch(error => console.error("Greška pri proveri uloge korisnika:", error));
 

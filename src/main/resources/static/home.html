@@ -250,10 +250,15 @@
             color: #6d6d6d;
             font-size: 0.85rem;
         }
-        .admin-only {
-            display: none;
+        .sidebar-nav {
+            visibility: hidden;
         }
 
+        .sidebar-nav.ready {
+            visibility: visible;
+        }
+
+        .admin-only,
         .user-only {
             display: none;
         }
@@ -501,7 +506,7 @@
             if (user.role === "ADMIN") {
 
                 document.querySelectorAll(".admin-only").forEach(element => {
-                    element.style.display = "block";
+                    element.style.display = "";
                 });
 
                 document.querySelectorAll(".user-only").forEach(element => {
@@ -515,10 +520,11 @@
                 });
 
                 document.querySelectorAll(".user-only").forEach(element => {
-                    element.style.display = "block";
+                    element.style.display = "";
                 });
 
             }
+            document.querySelector(".sidebar-nav").classList.add("ready");
         });
 
 

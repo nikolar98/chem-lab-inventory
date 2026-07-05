@@ -228,10 +228,15 @@
             font-weight: 600;
         }
 
-        .admin-only {
-            display: none;
+        .sidebar-nav {
+            visibility: hidden;
         }
 
+        .sidebar-nav.ready {
+            visibility: visible;
+        }
+
+        .admin-only,
         .user-only {
             display: none;
         }
@@ -258,7 +263,7 @@
         <a href="/potrosnja.html"> Potrošnja </a>
         <a href="/users.html" class="admin-only"> Korisnici </a>
         <a href="/reports.html"> Izveštaji </a>
-        <a href="/alerts.html"> Upozorenja </a>
+        <a href="/alerts.html" class="active"> Upozorenja </a>
         <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
         <a href="/requests.html" class="admin-only">Zahtevi</a>
     </nav>
@@ -605,24 +610,25 @@
             if (roleName === "ADMIN" || roleName === "ROLE_ADMIN") {
 
                 document.querySelectorAll(".admin-only").forEach(element => {
-                    element.style.display = "block";
+                    element.style.setProperty("display", "block", "important");
                 });
 
                 document.querySelectorAll(".user-only").forEach(element => {
-                    element.style.display = "none";
+                    element.style.setProperty("display", "none", "important");
                 });
 
             } else {
 
                 document.querySelectorAll(".admin-only").forEach(element => {
-                    element.style.display = "none";
+                    element.style.setProperty("display", "none", "important");
                 });
 
                 document.querySelectorAll(".user-only").forEach(element => {
-                    element.style.display = "block";
+                    element.style.setProperty("display", "block", "important");
                 });
 
             }
+            document.querySelector(".sidebar-nav").classList.add("ready");
         });
 
 </script>

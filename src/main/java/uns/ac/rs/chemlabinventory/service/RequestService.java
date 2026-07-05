@@ -7,6 +7,7 @@ import uns.ac.rs.chemlabinventory.repository.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -130,7 +131,7 @@ public class RequestService {
         consumption.setUser(user);
         consumption.setQuantity(requested);
         consumption.setUnit(batch.getPackageUnit());
-        consumption.setDateTaken(LocalDate.now());
+        consumption.setDateTaken(LocalDateTime.now());
         consumption.setPurpose(request.getPurpose());
         consumption.setNote(request.getComment());
 

@@ -132,10 +132,15 @@
             white-space: normal;
         }
 
-        .admin-only {
-            display: none;
+        .sidebar-nav {
+            visibility: hidden;
         }
 
+        .sidebar-nav.ready {
+            visibility: visible;
+        }
+
+        .admin-only,
         .user-only {
             display: none;
         }
@@ -225,7 +230,6 @@
         <a href="/users.html" class="admin-only"> Korisnici </a>
         <a href="/reports.html"> Izveštaji </a>
         <a href="/alerts.html"> Upozorenja </a>
-        <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
         <a href="/requests.html" class="admin-only active">Zahtevi</a>
     </nav>
 
@@ -588,7 +592,7 @@
             if (roleName === "ADMIN" || roleName === "ROLE_ADMIN") {
 
                 document.querySelectorAll(".admin-only").forEach(element => {
-                    element.style.display = "block";
+                    element.style.display = "";
                 });
 
                 document.querySelectorAll(".user-only").forEach(element => {
@@ -602,10 +606,11 @@
                 });
 
                 document.querySelectorAll(".user-only").forEach(element => {
-                    element.style.display = "block";
+                    element.style.display = "";
                 });
 
             }
+            document.querySelector(".sidebar-nav").classList.add("ready");
         });
 </script>
 

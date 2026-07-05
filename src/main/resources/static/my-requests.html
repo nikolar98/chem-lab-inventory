@@ -145,6 +145,8 @@
             color: #842029;
         }
 
+
+
     </style>
 </head>
 
@@ -208,21 +210,10 @@
 </div>
 
 <script>
-    let currentUserIsAdmin = false;
-
     fetch("/api/current-user")
         .then(response => response.json())
         .then(user => {
             document.getElementById("userEmail").textContent = user.email;
-
-            const roleName = user.role?.name || user.role;
-            currentUserIsAdmin = roleName === "ADMIN" || roleName === "ROLE_ADMIN";
-
-            if (currentUserIsAdmin) {
-                document.querySelectorAll(".admin-only").forEach(element => {
-                    element.classList.remove("admin-only");
-                });
-            }
         })
         .catch(error => console.error("Greška pri učitavanju korisnika:", error));
 
