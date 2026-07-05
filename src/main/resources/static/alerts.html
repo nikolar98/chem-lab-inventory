@@ -286,351 +286,254 @@
         </div>
 
     </div>
-
     <div class="container-fluid p-4">
 
         <div class="page-card mb-4">
-
             <div class="d-flex justify-content-between align-items-center mb-4">
-
                 <div>
-
                     <h2>Upozorenja</h2>
-
                     <p class="text-muted">
-                        Pregled upozorenja i kritičnih stavki koje zahtevaju pažnju.
+                        Pregled hemikalija čija je količina pala ispod definisanog kritičnog minimuma.
                     </p>
-
                 </div>
-
-                <button class="btn btn-outline-secondary">
-                    <i class="bi bi-gear"></i>
-                    Podešavanja upozorenja
-                </button>
-
             </div>
 
             <div class="row g-4">
-
                 <div class="col-md-3">
-
-                    <div class="alert-summary">
-
+                    <div class="alert-summary border-danger" style="border-width: 2px;">
                         <div class="summary-icon critical">
                             <i class="bi bi-exclamation-triangle"></i>
                         </div>
-
                         <div>
-                            <h2>8</h2>
-                            <strong>Kritična</strong><br>
-                            <span class="text-muted">hitna akcija</span>
+                            <h2 id="alertCriticalCount" class="mb-0 text-danger">0</h2>
+                            <strong>Kritična količina</strong><br>
+                            <span class="text-muted">hitna nabavka</span>
                         </div>
-
                     </div>
-
                 </div>
 
                 <div class="col-md-3">
-
                     <div class="alert-summary">
-
                         <div class="summary-icon high">
-                            <i class="bi bi-exclamation-triangle"></i>
+                            <i class="bi bi-calendar-x"></i>
                         </div>
-
                         <div>
-                            <h2>15</h2>
-                            <strong>Visok prioritet</strong><br>
-                            <span class="text-muted">uskoro ističe / nizak nivo</span>
+                            <h2 id="alertHighCount" class="mb-0">0</h2>
+                            <strong>Ističe rok</strong><br>
+                            <span class="text-muted">uskoro ističe (uskoro)</span>
                         </div>
-
                     </div>
-
                 </div>
 
                 <div class="col-md-3">
-
                     <div class="alert-summary">
-
                         <div class="summary-icon medium">
-                            <i class="bi bi-exclamation-triangle"></i>
+                            <i class="bi bi-clock-history"></i>
                         </div>
-
                         <div>
-                            <h2>23</h2>
-                            <strong>Srednji prioritet</strong><br>
-                            <span class="text-muted">praćenje preporučeno</span>
+                            <h2 id="alertMediumCount" class="mb-0">0</h2>
+                            <strong>Dugo otvoreno</strong><br>
+                            <span class="text-muted">praćenje (uskoro)</span>
                         </div>
-
                     </div>
-
                 </div>
 
                 <div class="col-md-3">
-
                     <div class="alert-summary">
-
                         <div class="summary-icon info">
                             <i class="bi bi-info-circle"></i>
                         </div>
-
                         <div>
-                            <h2>5</h2>
+                            <h2 id="alertInfoCount" class="mb-0">0</h2>
                             <strong>Informativno</strong><br>
                             <span class="text-muted">opšte informacije</span>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
 
         <div class="page-card">
-
-            <div class="row g-3 mb-4">
-
-                <div class="col-md-4">
-                    <input type="text"
-                           class="form-control"
-                           placeholder="Pretraži upozorenja...">
-                </div>
-
-                <div class="col-md-2">
-                    <select class="form-select">
-                        <option>Svi tipovi</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <select class="form-select">
-                        <option>Svi nivoi prioriteta</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <select class="form-select">
-                        <option>Sve lokacije</option>
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    <button class="btn btn-outline-secondary w-100">
-                        Filter
-                    </button>
-                </div>
-
-            </div>
-
+            <h5 class="mb-4">Lista aktivnih upozorenja</h5>
             <div class="table-responsive">
-
                 <table class="table align-middle">
-
                     <thead>
-
                     <tr>
-                        <th>Tip</th>
+                        <th></th>
                         <th>Nivo prioriteta</th>
-                        <th>Naziv hemikalije / Stavka</th>
-                        <th>Opis upozorenja</th>
+                        <th>Naziv hemikalije</th>
+                        <th>Status i količina</th>
                         <th>Lokacija</th>
-                        <th>Rok / Datum</th>
                         <th>Status</th>
                         <th>Akcije</th>
                     </tr>
-
                     </thead>
-
-                    <tbody>
-
+                    <tbody id="alertsTableBody">
                     <tr>
-
-                        <td>
-                            <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            Učitavanje upozorenja...
                         </td>
-
-                        <td>
-                            <span class="priority priority-critical">
-                                Kritična
-                            </span>
-                        </td>
-
-                        <td>Natrijum nitrit</td>
-
-                        <td>Istek roka trajanja</td>
-
-                        <td>Laboratorija 1 - Orman A</td>
-
-                        <td class="danger-date">
-                            30.05.2025
-                        </td>
-
-                        <td>
-                            <span class="status status-open">
-                                Nerešeno
-                            </span>
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex gap-2">
-
-                                <button class="btn btn-outline-secondary action-btn">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-
-                                <button class="btn btn-outline-success action-btn">
-                                    <i class="bi bi-check-circle"></i>
-                                </button>
-
-                            </div>
-
-                        </td>
-
                     </tr>
-
-                    <tr>
-
-                        <td>
-                            <i class="bi bi-exclamation-triangle-fill text-warning"></i>
-                        </td>
-
-                        <td>
-                            <span class="priority priority-high">
-                                Visok
-                            </span>
-                        </td>
-
-                        <td>Etanol (C₂H₅OH)</td>
-
-                        <td>Nivo zalihe ispod minimuma</td>
-
-                        <td>Skladište - Glavna prostorija</td>
-
-                        <td class="danger-date">
-                            10.06.2025
-                        </td>
-
-                        <td>
-                            <span class="status status-progress">
-                                U toku
-                            </span>
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex gap-2">
-
-                                <button class="btn btn-outline-secondary action-btn">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-
-                                <button class="btn btn-outline-success action-btn">
-                                    <i class="bi bi-check-circle"></i>
-                                </button>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>
-                            <i class="bi bi-info-circle-fill text-primary"></i>
-                        </td>
-
-                        <td>
-                            <span class="priority priority-info">
-                                Informativno
-                            </span>
-                        </td>
-
-                        <td>Kalibracija vage</td>
-
-                        <td>Podsetnik za kalibraciju uređaja</td>
-
-                        <td>Laboratorija 1</td>
-
-                        <td>
-                            15.06.2025
-                        </td>
-
-                        <td>
-                            <span class="status status-done">
-                                Rešeno
-                            </span>
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex gap-2">
-
-                                <button class="btn btn-outline-secondary action-btn">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
                     </tbody>
-
                 </table>
-
             </div>
-
         </div>
 
     </div>
-
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        loadCurrentUser();
+        loadAlerts();
+    });
 
-    const email = sessionStorage.getItem("email");
+    function loadCurrentUser() {
+        const email = sessionStorage.getItem("email");
+        if (email) {
+            document.getElementById("userEmail").textContent = email;
+        }
 
-    if (email) {
-        document.getElementById("userEmail").textContent = email;
+        fetch("/api/current-user")
+            .then(response => response.json())
+            .then(user => {
+                document.getElementById("userEmail").textContent = user.email;
+                const roleName = user.role?.name || user.role;
+
+                if (roleName === "ADMIN" || roleName === "ROLE_ADMIN") {
+                    document.querySelectorAll(".admin-only").forEach(element => {
+                        element.style.setProperty("display", "block", "important");
+                    });
+                    document.querySelectorAll(".user-only").forEach(element => {
+                        element.style.setProperty("display", "none", "important");
+                    });
+                } else {
+                    document.querySelectorAll(".admin-only").forEach(element => {
+                        element.style.setProperty("display", "none", "important");
+                    });
+                    document.querySelectorAll(".user-only").forEach(element => {
+                        element.style.setProperty("display", "block", "important");
+                    });
+                }
+                document.querySelector(".sidebar-nav").classList.add("ready");
+            })
+            .catch(error => console.error("Greška pri proveri uloge korisnika:", error));
     }
 
-    fetch("/api/current-user")
-        .then(response => response.json())
-        .then(user => {
+    function loadAlerts() {
+        fetch("/api/chemical-batches")
+            .then(response => response.json())
+            .then(batches => {
+                const tbody = document.getElementById("alertsTableBody");
+                tbody.innerHTML = "";
 
-            document.getElementById("userEmail").textContent = user.email;
+                let criticalCount = 0;
+                let highCount = 0;
 
-            const roleName = user.role?.name || user.role;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-            if (roleName === "ADMIN" || roleName === "ROLE_ADMIN") {
+                batches.forEach(batch => {
+                    const currentQty = Number(batch.currentQuantity || 0);
+                    const minAlarm = batch.minimumQuantityAlarm !== null && batch.minimumQuantityAlarm !== undefined ? Number(batch.minimumQuantityAlarm) : null;
 
-                document.querySelectorAll(".admin-only").forEach(element => {
-                    element.style.setProperty("display", "block", "important");
+                    let isCriticalQty = false;
+                    let isExpired = false;
+                    let isExpiringSoon = false;
+                    let daysToExpiry = null;
+
+                    if (minAlarm !== null && currentQty <= minAlarm) {
+                        isCriticalQty = true;
+                    }
+
+                    if (batch.expirationDate) {
+                        const expDate = new Date(batch.expirationDate);
+                        const diffTime = expDate.getTime() - today.getTime();
+                        daysToExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (daysToExpiry < 0) {
+                            isExpired = true;
+                        } else if (daysToExpiry <= 30) {
+                            isExpiringSoon = true;
+                        }
+                    }
+
+                    if (isCriticalQty || isExpired || isExpiringSoon) {
+                        const locationName = batch.locationName || "Nije definisana";
+                        const unit = batch.packageUnit || "";
+
+                        let alertIcon, priorityHtml, alertDescription, statusHtml;
+
+                        if (isExpired) {
+                            criticalCount++;
+                            alertIcon = '<i class="bi bi-calendar-x-fill text-danger fs-5"></i>';
+                            priorityHtml = '<span class="priority priority-critical">Kritično (Isteklo)</span>';
+                            alertDescription = `Hemikaliji je <strong>istekao rok trajanja</strong> pre ${Math.abs(daysToExpiry)} dana!`;
+                            statusHtml = '<span class="status status-open">Za otpis</span>';
+                        } else if (isExpiringSoon) {
+                            highCount++;
+                            alertIcon = '<i class="bi bi-calendar-event-fill text-warning fs-5"></i>';
+                            priorityHtml = '<span class="priority priority-high">Visok prioritet</span>';
+                            alertDescription = `Rok trajanja ističe za <strong>${daysToExpiry} dana</strong> (${formatDate(batch.expirationDate)}).`;
+                            statusHtml = '<span class="status status-progress">Preporučen utrošak</span>';
+                        } else if (isCriticalQty) {
+                            criticalCount++;
+                            alertIcon = '<i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>';
+                            priorityHtml = '<span class="priority priority-critical">Kritična količina</span>';
+                            alertDescription = `Zalihe su ispod minimuma! <strong class="text-danger">Trenutno: ${currentQty.toFixed(2).replace(/\.00$/, '')} ${unit}</strong> <span class="text-muted">(Alarm: ${minAlarm})</span>`;
+                            statusHtml = '<span class="status status-open">Potrebna nabavka</span>';
+                        }
+
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${alertIcon}</td>
+                            <td>${priorityHtml}</td>
+                            <td>
+                                <strong>${batch.chemicalName || 'Nepoznato'}</strong> <br>
+                                <small class="text-muted">Proizvođač: ${batch.manufacturerName || '—'}</small>
+                            </td>
+                            <td>${alertDescription}</td>
+                            <td>${locationName}</td>
+                            <td>${statusHtml}</td>
+                            <td>
+                                <a href="/chemicals.html" class="btn btn-outline-primary btn-sm action-btn" title="Idi u magacin">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                </a>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
                 });
 
-                document.querySelectorAll(".user-only").forEach(element => {
-                    element.style.setProperty("display", "none", "important");
-                });
+                const criticalCountEl = document.getElementById("alertCriticalCount");
+                const highCountEl = document.getElementById("alertHighCount");
 
-            } else {
+                if (criticalCountEl) criticalCountEl.textContent = criticalCount;
+                if (highCountEl) highCountEl.textContent = highCount;
 
-                document.querySelectorAll(".admin-only").forEach(element => {
-                    element.style.setProperty("display", "none", "important");
-                });
+                if (criticalCount === 0 && highCount === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="bi bi-shield-check text-success fs-1 d-block mb-2"></i>
+                                Trenutno nema upozorenja. Sve hemikalije su u roku i iznad kritičnog nivoa.
+                            </td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error("Greška pri učitavanju upozorenja:", error);
+            });
+    }
 
-                document.querySelectorAll(".user-only").forEach(element => {
-                    element.style.setProperty("display", "block", "important");
-                });
-
-            }
-            document.querySelector(".sidebar-nav").classList.add("ready");
-        });
-
+    function formatDate(dateString) {
+        if (!dateString) return "—";
+        const d = new Date(dateString);
+        return d.toLocaleDateString('sr-RS');
+    }
 </script>
 
 </body>

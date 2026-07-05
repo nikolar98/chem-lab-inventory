@@ -497,9 +497,8 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Proizvođač *</label>
-                                <select class="form-select" id="formManufacturer" required>
-                                    <option value="">Učitavanje proizvođača...</option>
-                                </select>
+                                <input type="text" class="form-control" id="formManufacturer" list="manufacturerList" required autocomplete="off" placeholder="Upiši ili izaberi postojećeg">
+                                <datalist id="manufacturerList"></datalist>
                             </div>
 
                             <div class="col-md-6">
@@ -521,9 +520,8 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Lokacija skladištenja</label>
-                                <select class="form-select" id="formLocation">
-                                    <option value="">Učitavanje lokacija...</option>
-                                </select>
+                                <input type="text" class="form-control" id="formLocation" list="locationList" autocomplete="off" placeholder="Upiši ili izaberi postojeću">
+                                <datalist id="locationList"></datalist>
                             </div>
 
                             <div class="col-md-6">
@@ -557,6 +555,21 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Cena po pakovanju (RSD)</label>
                                 <input type="number" step="0.01" min="0" class="form-control" id="formPrice" placeholder="Opciono">
+                            </div>
+
+                            <div class="col-md-12 mt-3">
+                                <label class="form-label fw-bold text-danger">Kritični minimum (Alarm) <i class="bi bi-bell-fill"></i></label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0" class="form-control border-danger" id="formMinimumAlarm" placeholder="Unesi ispod koje ukupne količine se pali upozorenje">
+                                    <span class="input-group-text bg-danger text-white" id="alarmUnitText">L</span>
+                                </div>
+                                <small class="text-muted">Ostavi prazno ako ne želiš upozorenja za ovu hemikaliju.</small>
+                            </div>
+
+                            <div class="col-md-12 mt-3">
+                                <label class="form-label fw-bold text-warning">Rok trajanja <i class="bi bi-calendar-event"></i></label>
+                                <input type="date" class="form-control border-warning" id="formExpirationDate">
+                                <small class="text-muted">Opciono. Ostaviti prazno ako hemikalija nema definisan rok trajanja.</small>
                             </div>
                         </div>
 
@@ -598,9 +611,8 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Proizvođač</label>
-                                <select class="form-select" id="editDataManufacturer">
-                                    <option value="">Učitavanje proizvođača...</option>
-                                </select>
+                                <input type="text" class="form-control" id="editDataManufacturer" list="editManufacturerList" autocomplete="off" placeholder="Upiši ili izaberi postojećeg">
+                                <datalist id="editManufacturerList"></datalist>
                             </div>
 
                             <div class="col-md-6">
@@ -610,10 +622,8 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Lokacija skladištenja</label>
-                                <select class="form-select" id="editDataLocation">
-                                    <option value="">Učitavanje lokacija...</option>
-                                </select>
-                                <input type="text" class="form-control mt-2" id="editDataCustomLocation" placeholder="Ili upiši novu lokaciju">
+                                <input type="text" class="form-control" id="editDataLocation" list="editLocationList" autocomplete="off" placeholder="Upiši ili izaberi postojeću">
+                                <datalist id="editLocationList"></datalist>
                             </div>
 
                             <div class="col-md-4">
@@ -635,6 +645,11 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Cena po pakovanju (RSD)</label>
                                 <input type="number" step="0.01" min="0" class="form-control" id="editDataPackagePrice">
+                            </div>
+
+                            <div class="col-md-12 mt-2">
+                                <label class="form-label fw-bold text-warning">Rok trajanja <i class="bi bi-calendar-event"></i></label>
+                                <input type="date" class="form-control border-warning" id="editDataExpirationDate">
                             </div>
 
                             <div class="col-12">
@@ -857,13 +872,11 @@
             currentUserIsAdmin = isAdmin;
 
             if (isAdmin) {
-
                 document.querySelectorAll(".admin-only").forEach(element => {
-                    element.style.display = "";
+                    element.style.setProperty("display", "block", "important");
                 });
-
                 document.querySelectorAll(".user-only").forEach(element => {
-                    element.style.display = "none";
+                    element.style.setProperty("display", "none", "important");
                 });
 
                 renderAllTables();
@@ -1336,6 +1349,7 @@
 
         document.getElementById('calcTotal').textContent = total.toFixed(2).replace(/\.00$/, '');
         document.getElementById('calcUnit').textContent = unit;
+        document.getElementById('alarmUnitText').textContent = unit;
     }
 
     function openAddChemicalModal() {
@@ -1368,17 +1382,16 @@
                 chemList.innerHTML += `<option value="${c.name}">`;
             });
 
-            const manSelect = document.getElementById('formManufacturer');
-            manSelect.innerHTML = '<option value="">Izaberi proizvođača...</option>';
+            const manList = document.getElementById('manufacturerList');
+            manList.innerHTML = '';
             manufacturers.forEach(m => {
-                manSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+                manList.innerHTML += `<option value="${m.name}">`;
             });
 
-
-            const locSelect = document.getElementById('formLocation');
-            locSelect.innerHTML = '<option value="">Izaberi lokaciju...</option>';
+            const locList = document.getElementById('locationList');
+            locList.innerHTML = '';
             locations.forEach(l => {
-                locSelect.innerHTML += `<option value="${l.id}">${l.name}</option>`;
+                locList.innerHTML += `<option value="${l.name}">`;
             });
 
             const userSelect = document.getElementById('formResponsibleUser');
@@ -1413,6 +1426,7 @@
         document.getElementById("editDataPackageUnit").value = normalizeUnit(batch.packageUnit) || "L";
         document.getElementById("editDataPackagePrice").value = batch.packagePrice ?? "";
         document.getElementById("editDataNote").value = batch.note || "";
+        document.getElementById("editDataExpirationDate").value = batch.expirationDate ? batch.expirationDate.split('T')[0] : "";
         document.getElementById("editDataCustomLocation").value = "";
 
         await loadDataEditOptions(batch);
@@ -1425,6 +1439,10 @@
         const chemList = document.getElementById("editChemNameList");
         const manufacturerSelect = document.getElementById("editDataManufacturer");
         const locationSelect = document.getElementById("editDataLocation");
+        const manList = document.getElementById("editManufacturerList");
+        const locList = document.getElementById("editLocationList");
+        manList.innerHTML = "";
+        locList.innerHTML = "";
 
         chemList.innerHTML = "";
         manufacturerSelect.innerHTML = '<option value="">Bez proizvođača</option>';
@@ -1452,23 +1470,17 @@
             });
 
             manufacturers.forEach(manufacturer => {
-                const option = document.createElement("option");
-                option.value = manufacturer.id;
-                option.textContent = manufacturer.name;
+                manList.innerHTML += `<option value="${manufacturer.name}">`;
                 if (batch.manufacturerId && Number(batch.manufacturerId) === Number(manufacturer.id)) {
-                    option.selected = true;
+                    document.getElementById("editDataManufacturer").value = manufacturer.name;
                 }
-                manufacturerSelect.appendChild(option);
             });
 
             locations.forEach(location => {
-                const option = document.createElement("option");
-                option.value = location.id;
-                option.textContent = location.name;
+                locList.innerHTML += `<option value="${location.name}">`;
                 if (batch.locationId && Number(batch.locationId) === Number(location.id)) {
-                    option.selected = true;
+                    document.getElementById("editDataLocation").value = location.name;
                 }
-                locationSelect.appendChild(option);
             });
 
         } catch (error) {
@@ -1494,15 +1506,15 @@
         }
 
         const chemicalName = document.getElementById("editDataChemicalName").value.trim();
-        const manufacturerId = document.getElementById("editDataManufacturer").value;
-        const locationId = document.getElementById("editDataLocation").value;
-        const customLocationName = document.getElementById("editDataCustomLocation").value.trim();
+        const manufacturerName = document.getElementById("editDataManufacturer").value.trim();
+        const locationName = document.getElementById("editDataLocation").value.trim();
         const purity = document.getElementById("editDataPurity").value.trim();
         const packageSize = parseFloat(document.getElementById("editDataPackageSize").value) || batch.packageSize;
         const packageUnit = document.getElementById("editDataPackageUnit").value || batch.packageUnit;
         const packagePriceValue = document.getElementById("editDataPackagePrice").value;
         const packagePrice = packagePriceValue === "" ? null : parseFloat(packagePriceValue);
         const note = document.getElementById("editDataNote").value.trim();
+        const expirationDate = document.getElementById("editDataExpirationDate").value || null;
 
         if (!chemicalName) {
             alert("Naziv hemikalije je obavezan.");
@@ -1511,7 +1523,8 @@
 
         try {
             const chemical = await getOrCreateChemicalByName(chemicalName, packageUnit);
-            const location = await getSelectedOrCreatedLocation(locationId, customLocationName);
+            const manufacturer = await getOrCreateManufacturerByName(manufacturerName);
+            const location = await getOrCreateLocationByName(locationName);
             const purchasedQuantity = Number(batch.purchasedQuantity || 1);
             const totalQuantity = Number(packageSize || 0) * purchasedQuantity;
             const totalPrice = packagePrice && purchasedQuantity ? packagePrice * purchasedQuantity : null;
@@ -1528,7 +1541,7 @@
                 purchasedQuantity: batch.purchasedQuantity,
                 totalQuantity: totalQuantity,
                 currentQuantity: batch.currentQuantity,
-                expirationDate: batch.expirationDate || null,
+                expirationDate: expirationDate,
                 packagePrice: packagePrice,
                 totalPrice: totalPrice,
                 minimumQuantityAlarm: batch.minimumQuantityAlarm || null,
@@ -1583,34 +1596,36 @@
         return chemical;
     }
 
-    async function getSelectedOrCreatedLocation(locationId, customLocationName) {
-        if (customLocationName) {
-            let location = existingLocations.find(item => item.name && item.name.toLowerCase() === customLocationName.toLowerCase());
+    async function getOrCreateManufacturerByName(name) {
+        if (!name) return null;
+        let manufacturer = existingManufacturers.find(item => item.name && item.name.toLowerCase() === name.toLowerCase());
+        if (manufacturer) return manufacturer;
 
-            if (location) {
-                return location;
-            }
+        const response = await fetch("/api/manufacturers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: name })
+        });
+        if (!response.ok) throw new Error("Neuspešno kreiranje novog proizvođača.");
+        manufacturer = await response.json();
+        existingManufacturers.push(manufacturer);
+        return manufacturer;
+    }
 
-            const response = await fetch("/api/locations", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: customLocationName })
-            });
+    async function getOrCreateLocationByName(name) {
+        if (!name) return null;
+        let location = existingLocations.find(item => item.name && item.name.toLowerCase() === name.toLowerCase());
+        if (location) return location;
 
-            if (!response.ok) {
-                throw new Error("Neuspešno kreiranje nove lokacije.");
-            }
-
-            location = await response.json();
-            existingLocations.push(location);
-            return location;
-        }
-
-        if (locationId) {
-            return { id: Number(locationId) };
-        }
-
-        return null;
+        const response = await fetch("/api/locations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: name })
+        });
+        if (!response.ok) throw new Error("Neuspešno kreiranje nove lokacije.");
+        location = await response.json();
+        existingLocations.push(location);
+        return location;
     }
 
     async function loadUsageLocations(prefix, selectedLocationName) {
@@ -2017,14 +2032,16 @@
         const name = document.getElementById('formChemName').value.trim();
         let purity = document.getElementById('formPurity').value.trim();
 
-        const manufacturerId = document.getElementById('formManufacturer').value;
-        const locationId = document.getElementById('formLocation').value;
-        const responsibleUserId = document.getElementById('formResponsibleUser').value; // NOVO
+        const manufacturerName = document.getElementById('formManufacturer').value.trim();
+        const locationName = document.getElementById('formLocation').value.trim();
+        const responsibleUserId = document.getElementById('formResponsibleUser').value;
         const packageSize = parseFloat(document.getElementById('formPackageSize').value);
         const packageUnit = document.getElementById('formPackageUnit').value;
         const quantity = parseInt(document.getElementById('formQuantity').value);
         const packagePrice = parseFloat(document.getElementById('formPrice').value) || null;
-
+        const minimumAlarmValue = document.getElementById('formMinimumAlarm').value;
+        const minimumAlarm = minimumAlarmValue !== "" ? parseFloat(minimumAlarmValue) : null;
+        const expirationDate = document.getElementById('formExpirationDate').value || null;
         const totalQty = packageSize * quantity;
         const totalPrice = packagePrice ? packagePrice * quantity : null;
 
@@ -2046,11 +2063,14 @@
                 chemical = await chemResponse.json();
             }
 
+            const manufacturer = await getOrCreateManufacturerByName(manufacturerName);
+            const location = await getOrCreateLocationByName(locationName);
+
             const batchPayload = {
                 chemical: { id: chemical.id },
-                manufacturer: manufacturerId ? { id: manufacturerId } : null,
-                location: locationId ? { id: locationId } : null,
-                responsibleUser: responsibleUserId ? { id: responsibleUserId } : null, // NOVO
+                manufacturer: manufacturer ? { id: manufacturer.id } : null,
+                location: location ? { id: location.id } : null,
+                responsibleUser: responsibleUserId ? { id: responsibleUserId } : null,
                 purity: purity,
                 packageSize: packageSize,
                 packageUnit: packageUnit,
@@ -2059,6 +2079,8 @@
                 currentQuantity: totalQty,
                 packagePrice: packagePrice,
                 totalPrice: totalPrice,
+                minimumQuantityAlarm: minimumAlarm,
+                expirationDate: expirationDate,
                 opened: false
             };
 
