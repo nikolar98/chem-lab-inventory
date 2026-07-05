@@ -793,7 +793,6 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <strong>Hemikalija:</strong> <span id="historyChemicalName">—</span><br>
-                    <strong>Lokacija:</strong> <span id="historyLocation">—</span><br>
                     <strong>Trenutna količina:</strong> <span id="historyCurrentQuantity">—</span>
                 </div>
 
@@ -805,6 +804,7 @@
                             <th>Korisnik</th>
                             <th>Količina</th>
                             <th>Svrha</th>
+                            <th>Lokacija</th>
                             <th>Napomena</th>
                         </tr>
                         </thead>
@@ -1557,7 +1557,6 @@
             alert(error.message);
         }
     }
-
     async function getOrCreateChemicalByName(name, unit) {
         let chemical = existingChemicals.find(item => item.name && item.name.toLowerCase() === name.toLowerCase());
 
@@ -1648,6 +1647,7 @@
 
         return select ? select.value : "";
     }
+
 
     function openEditModal(batchId) {
         const batch = allBatches.find(item => Number(item.id) === Number(batchId));
@@ -1906,14 +1906,13 @@
         }
 
         document.getElementById("historyChemicalName").textContent = batch.chemicalName || "—";
-        document.getElementById("historyLocation").textContent = normalizeLocation(batch.locationName);
         document.getElementById("historyCurrentQuantity").textContent =
             `${formatNumber(batch.currentQuantity)} ${normalizeUnit(batch.packageUnit)}`;
 
         const tbody = document.getElementById("historyTableBody");
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" class="text-center text-muted">
+                <td colspan="6" class="text-center text-muted">
                     Učitavanje istorije...
                 </td>
             </tr>
@@ -1935,7 +1934,7 @@
             if (!consumptions || consumptions.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="text-center text-muted">
+                        <td colspan="6" class="text-center text-muted">
                             Za ovu hemikaliju još nema evidentiranih zaduženja.
                         </td>
                     </tr>
@@ -1958,7 +1957,8 @@
                         <td>${userName || "—"}</td>
                         <td><strong>${formatNumber(consumption.quantity)} ${normalizeUnit(consumption.unit)}</strong></td>
                         <td>${valueOrDash(consumption.purpose)}</td>
-                        <td>${valueOrDash(consumption.note)}</td>
+                        <td>${extractUsageLocation(consumption.note)}</td>
+                        <td>${cleanHistoryNote(consumption.note)}</td>
                     </tr>
                 `;
             });
@@ -1966,12 +1966,27 @@
             console.error(error);
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-danger">
+                    <td colspan="6" class="text-center text-danger">
                         ${error.message}
                     </td>
                 </tr>
             `;
         }
+    }
+
+    function extractUsageLocation(note) {
+        if (!note) return "—";
+
+        const match = note.match(/Lokacija korišćenja:\s*([^;]+)/i);
+        return match ? match[1].trim() : "—";
+    }
+
+    function cleanHistoryNote(note) {
+        if (!note) return "—";
+
+        return note
+            .replace(/Lokacija korišćenja:\s*[^;]+;?\s*/i, "")
+            .trim() || "—";
     }
 
     function formatDateTime(value) {
