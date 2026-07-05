@@ -1,123 +1,151 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
-                                  http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
-              name="ChemicalCostReport" pageWidth="595" pageHeight="842"
-              columnWidth="555" leftMargin="20" rightMargin="20"
-              topMargin="20" bottomMargin="20">
+<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.21.3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ChemicalCostReport" pageWidth="700" pageHeight="842" columnWidth="660" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ddad4b30-c694-4c71-9bce-02a25619a37f">
+	<parameter name="fromDate" class="java.util.Date"/>
+	<parameter name="toDate" class="java.util.Date"/>
+	<parameter name="chemicalIds" class="java.util.List"/>
+	<parameter name="includePotrosnja" class="java.lang.Boolean"/>
+	<parameter name="includeStanje" class="java.lang.Boolean"/>
+	<parameter name="includeCena" class="java.lang.Boolean"/>
+	<queryString>
+		<![CDATA[SELECT
+    c.name AS HEMIKALIJA,
+    CASE
+        WHEN LOWER(cb.package_unit) = 'l' THEN 'L'
+        ELSE cb.package_unit
+    END AS JEDINICA,
+    SUM(cb.current_quantity) AS TRENUTNO_STANJE,
+    SUM(cb.package_price * cb.current_quantity) AS UKUPNA_CENA,
+    COALESCE((
+        SELECT SUM(cons.quantity)
+        FROM consumptions cons
+        JOIN chemical_batches sub_cb ON sub_cb.id = cons.chemical_batch_id
+        WHERE sub_cb.chemical_id = c.id
+          AND cons.date_taken BETWEEN $P{fromDate} AND $P{toDate}
+    ), 0) AS POTROSENO_U_PERIODU
+FROM chemical_batches cb
+JOIN chemicals c ON c.id = cb.chemical_id
+WHERE $X{IN, c.id, chemicalIds}
+GROUP BY c.id, c.name, cb.package_unit
+ORDER BY c.name ASC]]>
+	</queryString>
+	<field name="HEMIKALIJA" class="java.lang.String"/>
+	<field name="JEDINICA" class="java.lang.String"/>
+	<field name="TRENUTNO_STANJE" class="java.math.BigDecimal"/>
+	<field name="UKUPNA_CENA" class="java.math.BigDecimal"/>
+	<field name="POTROSENO_U_PERIODU" class="java.math.BigDecimal"/>
+	<title>
+		<band height="97">
+			<staticText>
+				<reportElement x="53" y="10" width="555" height="30" uuid="32d5aa74-bdd8-406c-aff9-6e972cb0fbaf"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Izveštaj o hemikalijama i potrošnji]]></text>
+			</staticText>
+			<line>
+				<reportElement x="53" y="45" width="555" height="1" uuid="dd526e98-5c43-41ea-b52e-ffa9d9890de7"/>
+				<graphicElement>
+					<pen lineWidth="0.8" lineColor="#333333"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="53" y="50" width="555" height="30" uuid="4f7d18f1-9086-4ecd-a932-93bd07b4e1c9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Period: " + new java.text.SimpleDateFormat("dd.MM.yyyy.").format($P{fromDate}) + " - " + new java.text.SimpleDateFormat("dd.MM.yyyy.").format($P{toDate})]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="50">
+			<staticText>
+				<reportElement x="0" y="0" width="167" height="25" uuid="988b7d13-0824-420b-8248-6291c46df3a8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hemikalija]]></text>
+			</staticText>
 
-    <queryString>
-        <![CDATA[
-        SELECT
-            c.name AS HEMIKALIJA,
-            CASE
-                WHEN LOWER(cb.package_unit) = 'l' THEN 'L'
-                ELSE cb.package_unit
-            END AS JEDINICA,
-            SUM(cb.current_quantity) AS UKUPNA_KOLICINA,
-            SUM(cb.total_price) AS UKUPNA_CENA
-        FROM chemical_batches cb
-        JOIN chemicals c ON c.id = cb.chemical_id
-        GROUP BY c.name, cb.package_unit
-        ORDER BY UKUPNA_CENA DESC
-        ]]>
-    </queryString>
+			<staticText>
+				<reportElement x="167" y="0" width="164" height="25" uuid="321ed07d-eb0b-4c41-bbd2-4cfcdd7759e5">
+					<printWhenExpression><![CDATA[$P{includePotrosnja}]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Potrošeno u periodu]]></text>
+			</staticText>
 
-    <field name="HEMIKALIJA" class="java.lang.String"/>
-    <field name="JEDINICA" class="java.lang.String"/>
-    <field name="UKUPNA_KOLICINA" class="java.math.BigDecimal"/>
-    <field name="UKUPNA_CENA" class="java.math.BigDecimal"/>
+			<staticText>
+				<reportElement x="331" y="0" width="164" height="25" uuid="6ed0d621-df4e-4691-9a31-9800d15e6e41">
+					<printWhenExpression><![CDATA[$P{includeStanje}]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Trenutno stanje]]></text>
+			</staticText>
 
-    <title>
-        <band height="80">
-            <staticText>
-                <reportElement x="0" y="10" width="555" height="30"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font size="18" isBold="true"/>
-                </textElement>
-                <text><![CDATA[Izveštaj o ukupnoj ceni po hemikaliji]]></text>
-            </staticText>
-
-            <line>
-                <reportElement x="0" y="45" width="555" height="1"/>
-                <graphicElement>
-                    <pen lineWidth="0.8" lineColor="#333333"/>
-                </graphicElement>
-            </line>
-        </band>
-    </title>
-
-    <columnHeader>
-        <band height="28">
-            <staticText>
-                <reportElement x="0" y="0" width="230" height="25"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font size="14" isBold="true"/>
-                </textElement>
-                <text>Hemikalija</text>
-            </staticText>
-
-            <staticText>
-                <reportElement x="230" y="0" width="150" height="25"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font size="14" isBold="true"/>
-                </textElement>
-                <text>Ukupna količina</text>
-            </staticText>
-
-            <staticText>
-                <reportElement x="380" y="0" width="175" height="25"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font size="14" isBold="true"/>
-                </textElement>
-                <text>Ukupna cena (RSD)</text>
-            </staticText>
-        </band>
-    </columnHeader>
-
-    <detail>
-        <band height="24">
-            <textField>
-                <reportElement x="0" y="0" width="230" height="22"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font size="11"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{HEMIKALIJA}]]></textFieldExpression>
-            </textField>
-
-            <textField>
-                <reportElement x="230" y="0" width="150" height="22"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font size="11"/>
-                </textElement>
-                <textFieldExpression><![CDATA[
-String.format("%.1f %s",
-    $F{UKUPNA_KOLICINA}.doubleValue(),
-    $F{JEDINICA})
-]]></textFieldExpression>
-            </textField>
-
-            <textField pattern="#,##0.00">
-                <reportElement x="380" y="0" width="175" height="22"/>
-                <textElement textAlignment="Center" verticalAlignment="Middle">
-                    <font size="11"/>
-                </textElement>
-                <textFieldExpression><![CDATA[$F{UKUPNA_CENA}]]></textFieldExpression>
-            </textField>
-        </band>
-    </detail>
-
-    <pageFooter>
-        <band height="25">
-            <textField>
-                <reportElement x="400" y="0" width="155" height="20"/>
-                <textElement textAlignment="Right">
-                    <font size="9"/>
-                </textElement>
-                <textFieldExpression><![CDATA["Strana " + $V{PAGE_NUMBER}]]></textFieldExpression>
-            </textField>
-        </band>
-    </pageFooter>
-
+			<staticText>
+				<reportElement x="495" y="0" width="164" height="25" uuid="a4676847-187d-40af-8c8f-3e207f6b764a">
+					<printWhenExpression><![CDATA[$P{includeCena}]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ukupna cena (RSD)]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="38">
+			<textField>
+				<reportElement x="0" y="0" width="167" height="22" uuid="9a544968-5a73-41f5-ae84-66941a804cfa"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{HEMIKALIJA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="167" y="0" width="164" height="22" uuid="64168fe6-6329-4a94-9df0-27ef01ec31fe">
+					<printWhenExpression><![CDATA[$P{includePotrosnja}]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[String.format("%.1f %s", $F{POTROSENO_U_PERIODU}.doubleValue(), $F{JEDINICA})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="331" y="0" width="164" height="22" uuid="50e77a59-fbf6-4f80-b74c-69cbc3307da3">
+					<printWhenExpression><![CDATA[$P{includeStanje}]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[String.format("%.1f %s", $F{TRENUTNO_STANJE}.doubleValue(), $F{JEDINICA})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="495" y="0" width="164" height="22" uuid="f22945b9-707f-4433-81e9-83196397d4a8">
+					<printWhenExpression><![CDATA[$P{includeCena}]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{UKUPNA_CENA}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="25">
+			<textField>
+				<reportElement x="0" y="0" width="660" height="20" uuid="3e1312ea-a2b4-443d-ad40-734218f7664f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
 </jasperReport>

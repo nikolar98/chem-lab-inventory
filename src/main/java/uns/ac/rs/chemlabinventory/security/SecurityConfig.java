@@ -30,6 +30,7 @@ public class SecurityConfig {
                                 "/login.html",
                                 "/register.html",
                                 "/register",
+                                "/reports",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**"
@@ -42,7 +43,6 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/requests.html",
                                 "/users.html",
-                                "/reports.html",
                                 "/api/requests/**",
                                 "/api/users/**"
                         ).hasRole("ADMIN")
