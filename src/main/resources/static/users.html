@@ -280,9 +280,9 @@
     <div class="topbar d-flex align-items-center justify-content-between px-4">
         <h4 class="mb-0">Korisnici</h4>
 
-        <div class="text-end">
-            <strong>Dobrodošli,</strong><br>
-            <small id="userEmail">admin@test.com</small>
+        <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-person-circle" style="font-size: 1.4rem; color: #203a43;"></i>
+            <span id="userName" style="font-weight: 600;">Učitavanje...</span>
         </div>
     </div>
 
@@ -485,15 +485,11 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    const ulogovaniEmail = sessionStorage.getItem("email");
-    if (ulogovaniEmail) {
-        document.getElementById("userEmail").textContent = ulogovaniEmail;
-    }
 
     fetch("/api/current-user")
         .then(response => response.json())
         .then(user => {
-            document.getElementById("userEmail").textContent = user.email;
+            document.getElementById("userName").textContent = `${user.firstName} ${user.lastName}`;
 
             const roleName = user.role?.name || user.role;
             const isAdmin = (roleName === "ADMIN" || roleName === "ROLE_ADMIN");
@@ -521,7 +517,10 @@
             }
             document.querySelector(".sidebar-nav").classList.add("ready");
         })
-        .catch(error => console.error("Greška pri proveri uloge korisnika:", error));
+        .catch(error => {
+            console.error("Greška pri proveri uloge korisnika:", error);
+            document.querySelector(".sidebar-nav").classList.add("ready");
+        });
 
     function openAddAdminModal() {
         document.getElementById('addAdminForm').reset();

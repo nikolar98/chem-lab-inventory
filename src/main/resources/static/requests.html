@@ -245,9 +245,9 @@
 
         <h4 class="mb-0">Zahtevi</h4>
 
-        <div class="text-end">
-            <strong>Dobrodošli</strong><br>
-            <small id="userEmail">admin@test.com</small>
+        <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-person-circle" style="font-size: 1.4rem; color: #203a43;"></i>
+            <span id="userName" style="font-weight: 600;">Učitavanje...</span>
         </div>
 
     </div>
@@ -335,11 +335,7 @@
 </div>
 
 <script>
-    const email = sessionStorage.getItem("email");
 
-    if (email) {
-        document.getElementById("userEmail").textContent = email;
-    }
 
     let chemicalBatchesById = new Map();
 
@@ -585,7 +581,7 @@
         .then(response => response.json())
         .then(user => {
 
-            document.getElementById("userEmail").textContent = user.email;
+            document.getElementById("userName").textContent = `${user.firstName} ${user.lastName}`;
 
             const roleName = user.role?.name || user.role;
 
@@ -610,6 +606,10 @@
                 });
 
             }
+            document.querySelector(".sidebar-nav").classList.add("ready");
+        })
+        .catch(error => {
+            console.error("Greška pri proveri uloge korisnika:", error);
             document.querySelector(".sidebar-nav").classList.add("ready");
         });
 </script>

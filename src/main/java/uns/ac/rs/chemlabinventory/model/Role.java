@@ -21,5 +21,11 @@ public class Role {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
+    public String getName() {
+        return name;
+    }
 
+    public Long getId() {
+        return id;
+    }
 }

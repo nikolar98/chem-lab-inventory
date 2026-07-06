@@ -296,9 +296,9 @@
 
         <h4 class="mb-0">Upozorenja</h4>
 
-        <div class="text-end">
-            <strong>Dobrodošli</strong><br>
-            <small id="userEmail">admin@test.com</small>
+        <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-person-circle" style="font-size: 1.4rem; color: #203a43;"></i>
+            <span id="userName" style="font-weight: 600;">Učitavanje...</span>
         </div>
 
     </div>
@@ -400,15 +400,10 @@
     });
 
     function loadCurrentUser() {
-        const email = sessionStorage.getItem("email");
-        if (email) {
-            document.getElementById("userEmail").textContent = email;
-        }
-
         fetch("/api/current-user")
             .then(response => response.json())
             .then(user => {
-                document.getElementById("userEmail").textContent = user.email;
+                document.getElementById("userName").textContent = `${user.firstName} ${user.lastName}`;
                 const roleName = user.role?.name || user.role;
 
                 if (roleName === "ADMIN" || roleName === "ROLE_ADMIN") {

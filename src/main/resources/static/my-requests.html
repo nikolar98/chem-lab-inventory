@@ -173,9 +173,9 @@
 <div class="content">
     <div class="topbar d-flex align-items-center justify-content-between px-4">
         <h4 class="mb-0">Moji zahtevi</h4>
-        <div class="text-end">
-            <strong>Dobrodošli</strong><br>
-            <small id="userEmail">korisnik</small>
+        <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-person-circle" style="font-size: 1.4rem; color: #203a43;"></i>
+            <span id="userName" style="font-weight: 600;">Učitavanje...</span>
         </div>
     </div>
 
@@ -213,7 +213,7 @@
     fetch("/api/current-user")
         .then(response => response.json())
         .then(user => {
-            document.getElementById("userEmail").textContent = user.email;
+            document.getElementById("userName").textContent = `${user.firstName} ${user.lastName}`;
         })
         .catch(error => console.error("Greška pri učitavanju korisnika:", error));
 

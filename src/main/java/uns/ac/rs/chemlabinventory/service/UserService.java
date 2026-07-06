@@ -27,6 +27,11 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Korisnik nije pronadjen."));
     }
 
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Korisnik sa emailom " + email + " nije pronađen."));
+    }
+
     public User save(User user) {
         if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
