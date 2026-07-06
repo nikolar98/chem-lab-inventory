@@ -1,6 +1,7 @@
 package uns.ac.rs.chemlabinventory.controller;
 
 import org.springframework.web.bind.annotation.*;
+import uns.ac.rs.chemlabinventory.dto.AlertStatsDTO;
 import uns.ac.rs.chemlabinventory.dto.ChemicalBatchDTO;
 import uns.ac.rs.chemlabinventory.model.ChemicalBatch;
 import uns.ac.rs.chemlabinventory.service.ChemicalBatchService;
@@ -54,5 +55,10 @@ public class ChemicalBatchController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         chemicalBatchService.delete(id);
+    }
+
+    @GetMapping("/stats")
+    public AlertStatsDTO getStats() {
+        return chemicalBatchService.getAlertStats();
     }
 }

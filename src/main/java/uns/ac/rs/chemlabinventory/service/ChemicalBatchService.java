@@ -1,6 +1,7 @@
 package uns.ac.rs.chemlabinventory.service;
 
 import org.springframework.stereotype.Service;
+import uns.ac.rs.chemlabinventory.dto.AlertStatsDTO;
 import uns.ac.rs.chemlabinventory.dto.ChemicalBatchDTO;
 import uns.ac.rs.chemlabinventory.model.ChemicalBatch;
 import uns.ac.rs.chemlabinventory.repository.ChemicalBatchRepository;
@@ -104,5 +105,27 @@ public class ChemicalBatchService {
         dto.setNote(batch.getNote());
 
         return dto;
+    }
+
+    public AlertStatsDTO getAlertStats() {
+        List<ChemicalBatch> all = chemicalBatchRepository.findAll();
+        long opened = chemicalBatchRepository.countByOpenedTrue();
+
+        long today = System.currentTimeMillis();
+        long thirtyDaysMs = 30L * 24 * 60 * 60 * 1000;
+        long critical = 0;
+        long expiring = 0;
+
+        for (ChemicalBatch b : all) {
+            if (b.getMinimumQuantityAlarm() != null && b.getCurrentQuantity() != null) {
+                if (b.getCurrentQuantity().compareTo(b.getMinimumQuantityAlarm()) <= 0) critical++;
+            }
+            if (b.getExpirationDate() != null) {
+                long expDate = java.sql.Date.valueOf(b.getExpirationDate()).getTime();
+                if (expDate < today) critical++;
+                else if (expDate <= (today + thirtyDaysMs)) expiring++;
+            }
+        }
+        return new AlertStatsDTO(critical, expiring, opened);
     }
 }

@@ -185,7 +185,7 @@
         .card {
             background: white;
             border-radius: 16px;
-            padding: 22px;
+            padding: 16px;
             box-shadow: 0 5px 18px rgba(0,0,0,0.08);
 
             display: flex;
@@ -414,7 +414,7 @@
                         <i class="bi bi-box2-open"></i>
                     </div>
                     <div>
-                        <h2 style="margin:0; font-size:24px;">Otvorena pak.</h2>
+                        <h2 style="margin:0; font-size:24px;">Otvorena pakovanja</h2>
                         <strong id="homeOpenedCount" style="font-size:20px; color:#0dcaf0;">0 pakovanja</strong>
                     </div>
                 </div>
@@ -476,48 +476,23 @@
 
 
         function loadAlertSummary() {
-            fetch("/api/chemical-batches")
+            fetch("/api/chemical-batches/stats")
                 .then(response => response.json())
-                .then(batches => {
-                    let countCritical = 0, countHigh = 0, countOpened = 0;
-
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-
-                    batches.forEach(batch => {
-                        const currentQty = Number(batch.currentQuantity || 0);
-                        const minAlarm = batch.minimumQuantityAlarm !== null && batch.minimumQuantityAlarm !== undefined ? Number(batch.minimumQuantityAlarm) : null;
-
-                        if (batch.expirationDate) {
-                            const expDate = new Date(batch.expirationDate);
-                            const daysToExpiry = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                            if (daysToExpiry < 0) countCritical++;
-                            else if (daysToExpiry <= 30) countHigh++;
-                        }
-
-                        if (minAlarm !== null && currentQty <= minAlarm) {
-                            countCritical++;
-                        }
-
-                        if (batch.opened) {
-                            countOpened++;
-                        }
-                    });
-
-                    document.getElementById("homeCriticalCount").textContent = `${countCritical} upozorenja`;
-                    document.getElementById("homeHighCount").textContent = `${countHigh} upozorenja`;
-                    document.getElementById("homeOpenedCount").textContent = `${countOpened} pakovanja`;
+                .then(data => {
+                    document.getElementById("homeCriticalCount").textContent = `${data.critical}`;
+                    document.getElementById("homeHighCount").textContent = `${data.expiring}`;
+                    document.getElementById("homeOpenedCount").textContent = `${data.opened}`;
 
                     document.getElementById("homeCriticalText").textContent =
-                        countCritical === 0 ? "Sve količine i rokovi su stabilni." : `${countCritical} pakovanja je palo ispod minimuma ili im je istekao rok.`;
+                        data.critical === 0 ? "Sve količine i rokovi su stabilni." : `${data.critical} pakovanja je palo ispod minimuma ili im je istekao rok.`;
 
                     document.getElementById("homeHighText").textContent =
-                        countHigh === 0 ? "Nema hemikalija koje ističu uskoro." : `${countHigh} hemikalija ističe u narednih 30 dana.`;
+                        data.expiring === 0 ? "Nema hemikalija koje ističu uskoro." : `${data.expiring} hemikalija ističe u narednih 30 dana.`;
 
                     document.getElementById("homeOpenedText").textContent =
-                        countOpened === 0 ? "Trenutno nema evidentiranih otvorenih pakovanja." : `Evidentirano je ${countOpened} pakovanja koja su trenutno u upotrebi.`;
+                        data.opened === 0 ? "Trenutno nema evidentiranih otvorenih pakovanja." : `Evidentirano je ${data.opened} pakovanja koja su trenutno u upotrebi.`;
                 })
-                .catch(error => console.error("Greška pri učitavanju zaliha za početnu stranu:", error));
+                .catch(error => console.error("Greška pri učitavanju statistike:", error));
         }
 
 
