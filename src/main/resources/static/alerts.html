@@ -109,6 +109,22 @@
             border-bottom: 1px solid #e5e7eb;
         }
 
+        .filter-card {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+
+        .filter-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        }
+
+        .filter-card.active-filter {
+            border-color: #008b95;
+            background-color: #f4fafb;
+        }
+
         .page-card {
             background: white;
             border-radius: 14px;
@@ -288,66 +304,47 @@
     </div>
     <div class="container-fluid p-4">
 
-        <div class="page-card mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2>Upozorenja</h2>
-                    <p class="text-muted">
-                        Pregled hemikalija čija je količina pala ispod definisanog kritičnog minimuma.
-                    </p>
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="alert-summary filter-card" id="card-critical" onclick="setFilter('critical', this)">
+                    <div class="summary-icon critical"><i class="bi bi-exclamation-triangle"></i></div>
+                    <div>
+                        <h2 id="alertCriticalCount" class="mb-0 text-danger">0</h2>
+                        <strong>Kritično</strong><br>
+                        <span class="text-muted">hitna nabavka / otpis</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="alert-summary border-danger" style="border-width: 2px;">
-                        <div class="summary-icon critical">
-                            <i class="bi bi-exclamation-triangle"></i>
-                        </div>
-                        <div>
-                            <h2 id="alertCriticalCount" class="mb-0 text-danger">0</h2>
-                            <strong>Kritična količina</strong><br>
-                            <span class="text-muted">hitna nabavka</span>
-                        </div>
+            <div class="col-md-3">
+                <div class="alert-summary filter-card" id="card-high" onclick="setFilter('high', this)">
+                    <div class="summary-icon high"><i class="bi bi-calendar-event"></i></div>
+                    <div>
+                        <h2 id="alertHighCount" class="mb-0 text-warning">0</h2>
+                        <strong>Ističe rok</strong><br>
+                        <span class="text-muted">uskoro ističe</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-3">
-                    <div class="alert-summary">
-                        <div class="summary-icon high">
-                            <i class="bi bi-calendar-x"></i>
-                        </div>
-                        <div>
-                            <h2 id="alertHighCount" class="mb-0">0</h2>
-                            <strong>Ističe rok</strong><br>
-                            <span class="text-muted">uskoro ističe (uskoro)</span>
-                        </div>
+            <div class="col-md-3">
+                <div class="alert-summary filter-card" id="card-medium" onclick="setFilter('medium', this)">
+                    <div class="summary-icon medium"><i class="bi bi-box2-open"></i></div>
+                    <div>
+                        <h2 id="alertOpenedCount" class="mb-0 text-info">0</h2>
+                        <strong>Otvorena pakovanja</strong><br>
+                        <span class="text-muted">trenutno u upotrebi</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-3">
-                    <div class="alert-summary">
-                        <div class="summary-icon medium">
-                            <i class="bi bi-clock-history"></i>
-                        </div>
-                        <div>
-                            <h2 id="alertMediumCount" class="mb-0">0</h2>
-                            <strong>Dugo otvoreno</strong><br>
-                            <span class="text-muted">praćenje (uskoro)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="alert-summary">
-                        <div class="summary-icon info">
-                            <i class="bi bi-info-circle"></i>
-                        </div>
-                        <div>
-                            <h2 id="alertInfoCount" class="mb-0">0</h2>
-                            <strong>Informativno</strong><br>
-                            <span class="text-muted">opšte informacije</span>
-                        </div>
+            <div class="col-md-3">
+                <div class="alert-summary filter-card" id="card-info" onclick="setFilter('info', this)">
+                    <div class="summary-icon info"><i class="bi bi-info-circle"></i></div>
+                    <div>
+                        <h2 id="alertInfoCount" class="mb-0 text-primary">0</h2>
+                        <strong>Informativno</strong><br>
+                        <span class="text-muted">pakovanja sa napomenom</span>
                     </div>
                 </div>
             </div>
@@ -387,6 +384,18 @@
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         loadCurrentUser();
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterParam = urlParams.get('filter');
+
+        if (filterParam && ['critical', 'high', 'medium', 'info'].includes(filterParam)) {
+            activeFilter = filterParam;
+
+            setTimeout(() => {
+                document.querySelectorAll('.filter-card').forEach(el => el.classList.remove('active-filter'));
+                const targetCard = document.getElementById('card-' + filterParam);
+                if (targetCard) targetCard.classList.add('active-filter');
+            }, 150);
+        }
         loadAlerts();
     });
 
@@ -422,111 +431,164 @@
             .catch(error => console.error("Greška pri proveri uloge korisnika:", error));
     }
 
+    let allAlerts = [];
+    let activeFilter = 'all';
+
     function loadAlerts() {
         fetch("/api/chemical-batches")
             .then(response => response.json())
             .then(batches => {
-                const tbody = document.getElementById("alertsTableBody");
-                tbody.innerHTML = "";
-
-                let criticalCount = 0;
-                let highCount = 0;
+                allAlerts = [];
 
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
+                let countCritical = 0, countHigh = 0, countOpened = 0, countInfo = 0;
+
                 batches.forEach(batch => {
                     const currentQty = Number(batch.currentQuantity || 0);
                     const minAlarm = batch.minimumQuantityAlarm !== null && batch.minimumQuantityAlarm !== undefined ? Number(batch.minimumQuantityAlarm) : null;
-
-                    let isCriticalQty = false;
-                    let isExpired = false;
-                    let isExpiringSoon = false;
-                    let daysToExpiry = null;
-
-                    if (minAlarm !== null && currentQty <= minAlarm) {
-                        isCriticalQty = true;
-                    }
+                    const unit = batch.packageUnit || "";
+                    const locationName = batch.locationName || "Nije definisana";
 
                     if (batch.expirationDate) {
                         const expDate = new Date(batch.expirationDate);
                         const diffTime = expDate.getTime() - today.getTime();
-                        daysToExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        const daysToExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                         if (daysToExpiry < 0) {
-                            isExpired = true;
+                            countCritical++;
+                            allAlerts.push({
+                                type: 'critical',
+                                batch: batch,
+                                icon: '<i class="bi bi-calendar-x-fill text-danger fs-5"></i>',
+                                priority: '<span class="priority priority-critical">Kritično (Isteklo)</span>',
+                                desc: `Hemikaliji je <strong>istekao rok trajanja</strong> pre ${Math.abs(daysToExpiry)} dana!`,
+                                status: '<span class="status status-open">Za otpis</span>'
+                            });
                         } else if (daysToExpiry <= 30) {
-                            isExpiringSoon = true;
+                            countHigh++;
+                            allAlerts.push({
+                                type: 'high',
+                                batch: batch,
+                                icon: '<i class="bi bi-calendar-event-fill text-warning fs-5"></i>',
+                                priority: '<span class="priority priority-high" style="background:#fff0e2; color:#fd7e14;">Visok prioritet</span>',
+                                desc: `Rok trajanja ističe za <strong>${daysToExpiry} dana</strong> (${formatDate(batch.expirationDate)}).`,
+                                status: '<span class="status status-progress" style="background:#fff0e2; color:#fd7e14;">Preporučen utrošak</span>'
+                            });
                         }
                     }
 
-                    if (isCriticalQty || isExpired || isExpiringSoon) {
-                        const locationName = batch.locationName || "Nije definisana";
-                        const unit = batch.packageUnit || "";
+                    if (minAlarm !== null && currentQty <= minAlarm) {
+                        countCritical++;
+                        allAlerts.push({
+                            type: 'critical',
+                            batch: batch,
+                            icon: '<i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>',
+                            priority: '<span class="priority priority-critical">Kritična količina</span>',
+                            desc: `Zalihe su ispod minimuma! <strong class="text-danger">Trenutno: ${currentQty.toFixed(2).replace(/\.00$/, '')} ${unit}</strong> <span class="text-muted">(Alarm: ${minAlarm})</span>`,
+                            status: '<span class="status status-open">Potrebna nabavka</span>'
+                        });
+                    }
 
-                        let alertIcon, priorityHtml, alertDescription, statusHtml;
+                    if (batch.opened) {
+                        countOpened++;
+                        allAlerts.push({
+                            type: 'medium',
+                            batch: batch,
+                            icon: '<i class="bi bi-box2-open-fill text-info fs-5"></i>',
+                            priority: '<span class="priority priority-medium" style="background:#e8f4fd; color:#0dcaf0;">Otvoreno pakovanje</span>',
+                            desc: `Ovo pakovanje je zavedeno kao otvoreno. Preostalo: <strong>${currentQty.toFixed(2).replace(/\.00$/, '')} ${unit}</strong>.`,
+                            status: '<span class="status status-progress" style="background:#e8f4fd; color:#0dcaf0;">U upotrebi</span>'
+                        });
+                    }
 
-                        if (isExpired) {
-                            criticalCount++;
-                            alertIcon = '<i class="bi bi-calendar-x-fill text-danger fs-5"></i>';
-                            priorityHtml = '<span class="priority priority-critical">Kritično (Isteklo)</span>';
-                            alertDescription = `Hemikaliji je <strong>istekao rok trajanja</strong> pre ${Math.abs(daysToExpiry)} dana!`;
-                            statusHtml = '<span class="status status-open">Za otpis</span>';
-                        } else if (isExpiringSoon) {
-                            highCount++;
-                            alertIcon = '<i class="bi bi-calendar-event-fill text-warning fs-5"></i>';
-                            priorityHtml = '<span class="priority priority-high">Visok prioritet</span>';
-                            alertDescription = `Rok trajanja ističe za <strong>${daysToExpiry} dana</strong> (${formatDate(batch.expirationDate)}).`;
-                            statusHtml = '<span class="status status-progress">Preporučen utrošak</span>';
-                        } else if (isCriticalQty) {
-                            criticalCount++;
-                            alertIcon = '<i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>';
-                            priorityHtml = '<span class="priority priority-critical">Kritična količina</span>';
-                            alertDescription = `Zalihe su ispod minimuma! <strong class="text-danger">Trenutno: ${currentQty.toFixed(2).replace(/\.00$/, '')} ${unit}</strong> <span class="text-muted">(Alarm: ${minAlarm})</span>`;
-                            statusHtml = '<span class="status status-open">Potrebna nabavka</span>';
-                        }
-
-                        const tr = document.createElement("tr");
-                        tr.innerHTML = `
-                            <td>${alertIcon}</td>
-                            <td>${priorityHtml}</td>
-                            <td>
-                                <strong>${batch.chemicalName || 'Nepoznato'}</strong> <br>
-                                <small class="text-muted">Proizvođač: ${batch.manufacturerName || '—'}</small>
-                            </td>
-                            <td>${alertDescription}</td>
-                            <td>${locationName}</td>
-                            <td>${statusHtml}</td>
-                            <td>
-                                <a href="/chemicals.html" class="btn btn-outline-primary btn-sm action-btn" title="Idi u magacin">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                </a>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
+                    if (batch.note && batch.note.trim() !== "") {
+                        countInfo++;
+                        allAlerts.push({
+                            type: 'info',
+                            batch: batch,
+                            icon: '<i class="bi bi-chat-text-fill text-primary fs-5"></i>',
+                            priority: '<span class="priority priority-info" style="background:#e8f2ff; color:#0d6efd;">Informativno</span>',
+                            desc: `<strong>Zabeležena napomena:</strong> ${batch.note}`,
+                            status: '<span class="status status-done" style="background:#e8f2ff; color:#0d6efd;">Zabeleženo</span>'
+                        });
                     }
                 });
 
-                const criticalCountEl = document.getElementById("alertCriticalCount");
-                const highCountEl = document.getElementById("alertHighCount");
+                document.getElementById("alertCriticalCount").textContent = countCritical;
+                document.getElementById("alertHighCount").textContent = countHigh;
+                document.getElementById("alertOpenedCount").textContent = countOpened;
+                document.getElementById("alertInfoCount").textContent = countInfo;
 
-                if (criticalCountEl) criticalCountEl.textContent = criticalCount;
-                if (highCountEl) highCountEl.textContent = highCount;
-
-                if (criticalCount === 0 && highCount === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
-                                <i class="bi bi-shield-check text-success fs-1 d-block mb-2"></i>
-                                Trenutno nema upozorenja. Sve hemikalije su u roku i iznad kritičnog nivoa.
-                            </td>
-                        </tr>
-                    `;
-                }
+                renderAlerts();
             })
-            .catch(error => {
-                console.error("Greška pri učitavanju upozorenja:", error);
-            });
+            .catch(error => console.error("Greška pri učitavanju upozorenja:", error));
+    }
+
+    function setFilter(filterType, element) {
+        if (activeFilter === filterType && filterType !== 'all') {
+            activeFilter = 'all';
+            document.querySelectorAll('.filter-card').forEach(el => el.classList.remove('active-filter'));
+        } else {
+            activeFilter = filterType;
+            document.querySelectorAll('.filter-card').forEach(el => el.classList.remove('active-filter'));
+            if (element) {
+                element.classList.add('active-filter');
+            }
+        }
+        renderAlerts();
+    }
+
+    function renderAlerts() {
+        const tbody = document.getElementById("alertsTableBody");
+        tbody.innerHTML = "";
+
+        const priorityOrder = {
+            'critical': 1,
+            'high': 2,
+            'medium': 3,
+            'info': 4
+        };
+
+        let filteredAlerts = activeFilter === 'all'
+            ? [...allAlerts]
+            : allAlerts.filter(a => a.type === activeFilter);
+
+        filteredAlerts.sort((a, b) => priorityOrder[a.type] - priorityOrder[b.type]);
+
+        if (filteredAlerts.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-5">
+                        <i class="bi bi-check2-circle text-success fs-1 d-block mb-2"></i>
+                        Nema upozorenja za izabranu kategoriju.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        filteredAlerts.forEach(alert => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${alert.icon}</td>
+                <td>${alert.priority}</td>
+                <td>
+                    <strong>${alert.batch.chemicalName || 'Nepoznato'}</strong> <br>
+                    <small class="text-muted">Proizvođač: ${alert.batch.manufacturerName || '—'}</small>
+                </td>
+                <td>${alert.desc}</td>
+                <td>${alert.batch.locationName || 'Nije definisana'}</td>
+                <td>${alert.status}</td>
+                <td>
+                    <a href="/chemicals.html" class="btn btn-outline-primary btn-sm action-btn" title="Idi u magacin">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 
     function formatDate(dateString) {

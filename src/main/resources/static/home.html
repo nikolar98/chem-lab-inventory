@@ -209,6 +209,10 @@
             border-left: 5px solid #d9a300;
         }
 
+        .warning-blue {
+            border-left: 5px solid #0dcaf0;
+        }
+
         .card p {
             color: #5f6f7a;
             font-size: 0.95rem;
@@ -373,101 +377,49 @@
         <div class="cards">
 
             <div class="card warning-red">
-
                 <div style="display:flex; align-items:center; gap:18px;">
-
-                    <div style="
-            width:60px;
-            height:60px;
-            border-radius:50%;
-            background:#ffe8e8;
-            color:#dc3545;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:28px;
-        ">
-                        ⚠
+                    <div style="width:60px; height:60px; border-radius:50%; background:#ffe8e8; color:#dc3545; display:flex; align-items:center; justify-content:center; font-size:28px;">
+                        <i class="bi bi-exclamation-triangle"></i>
                     </div>
-
                     <div>
-
-                        <h2 style="margin:0; font-size:28px;">
-                            Kritično
-                        </h2>
-
-                        <strong style="font-size:20px; color:#dc3545;">
-                            8 upozorenja
-                        </strong>
-
-                        <p style="margin:6px 0 0;">
-                            8 hemikalija je ispod minimalne količine.
-                            Najkritičnije: Hlorna kiselina (50 ml).
-                        </p>
-
+                        <h2 style="margin:0; font-size:28px;">Kritično</h2>
+                        <strong id="homeCriticalCount" style="font-size:20px; color:#dc3545;">0 upozorenja</strong>
                     </div>
-
                 </div>
-
-                <button onclick="window.location.href='/alerts.html'">
+                <p id="homeCriticalText" style="margin-top:12px;">Učitavanje podataka iz baze...</p>
+                <button onclick="window.location.href='/alerts.html?filter=critical'" style="margin-top:auto;">
                     Pogledaj detalje
                 </button>
-
             </div>
 
             <div class="card warning-orange">
-
                 <div style="display:flex; align-items:center; gap:18px;">
-
-                    <div style="
-            width:60px;
-            height:60px;
-            border-radius:50%;
-            background:#fff0e2;
-            color:#fd7e14;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:28px;
-        ">
-                        ⚠
+                    <div style="width:60px; height:60px; border-radius:50%; background:#fff0e2; color:#fd7e14; display:flex; align-items:center; justify-content:center; font-size:28px;">
+                        <i class="bi bi-calendar-event"></i>
                     </div>
-
                     <div>
-
-                        <h2 style="margin:0; font-size:28px;">
-                            Nisko stanje
-                        </h2>
-
-                        <strong style="font-size:20px; color:#fd7e14;">
-                            15 upozorenja
-                        </strong>
-
-                        <p style="margin:6px 0 0;">
-                            Natrijum hidroksid uskoro dostiže minimalnu količinu.
-                        </p>
-
+                        <h2 style="margin:0; font-size:28px;">Ističe rok</h2>
+                        <strong id="homeHighCount" style="font-size:20px; color:#fd7e14;">0 upozorenja</strong>
                     </div>
-
                 </div>
-
-                <button
-                        onclick="window.location.href='/alerts.html'"
-                        style="margin-top:18px;">
+                <p id="homeHighText" style="margin-top:12px;">Učitavanje podataka iz baze...</p>
+                <button onclick="window.location.href='/alerts.html?filter=high'" style="margin-top:auto;">
                     Pogledaj detalje
                 </button>
-
             </div>
 
-            <div class="card warning-yellow">
-                <h3>Rok trajanja — tekuća godina</h3>
-
-                <p>
-                    5 hemikalija ističe u narednih 30 dana.
-                    Najbliži rok: Sumporna kiselina — 05.07.2026.
-                </p>
-
-                <button onclick="window.location.href='/alerts.html'">
+            <div class="card warning-blue">
+                <div style="display:flex; align-items:center; gap:18px;">
+                    <div style="width:60px; height:60px; border-radius:50%; background:#e8f4fd; color:#0dcaf0; display:flex; align-items:center; justify-content:center; font-size:28px;">
+                        <i class="bi bi-box2-open"></i>
+                    </div>
+                    <div>
+                        <h2 style="margin:0; font-size:24px;">Otvorena pak.</h2>
+                        <strong id="homeOpenedCount" style="font-size:20px; color:#0dcaf0;">0 pakovanja</strong>
+                    </div>
+                </div>
+                <p id="homeOpenedText" style="margin-top:12px;">Učitavanje podataka iz baze...</p>
+                <button onclick="window.location.href='/alerts.html?filter=medium'" style="margin-top:auto;">
                     Pogledaj detalje
                 </button>
             </div>
@@ -493,6 +445,10 @@
 
 <script>
     const email = sessionStorage.getItem("email");
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadAlertSummary();
+    });
 
     if (email) {
         document.getElementById("userEmail").textContent = email;
@@ -526,6 +482,52 @@
             }
             document.querySelector(".sidebar-nav").classList.add("ready");
         });
+
+
+        function loadAlertSummary() {
+            fetch("/api/chemical-batches")
+                .then(response => response.json())
+                .then(batches => {
+                    let countCritical = 0, countHigh = 0, countOpened = 0;
+
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    batches.forEach(batch => {
+                        const currentQty = Number(batch.currentQuantity || 0);
+                        const minAlarm = batch.minimumQuantityAlarm !== null && batch.minimumQuantityAlarm !== undefined ? Number(batch.minimumQuantityAlarm) : null;
+
+                        if (batch.expirationDate) {
+                            const expDate = new Date(batch.expirationDate);
+                            const daysToExpiry = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                            if (daysToExpiry < 0) countCritical++;
+                            else if (daysToExpiry <= 30) countHigh++;
+                        }
+
+                        if (minAlarm !== null && currentQty <= minAlarm) {
+                            countCritical++;
+                        }
+
+                        if (batch.opened) {
+                            countOpened++;
+                        }
+                    });
+
+                    document.getElementById("homeCriticalCount").textContent = `${countCritical} upozorenja`;
+                    document.getElementById("homeHighCount").textContent = `${countHigh} upozorenja`;
+                    document.getElementById("homeOpenedCount").textContent = `${countOpened} pakovanja`;
+
+                    document.getElementById("homeCriticalText").textContent =
+                        countCritical === 0 ? "Sve količine i rokovi su stabilni." : `${countCritical} pakovanja je palo ispod minimuma ili im je istekao rok.`;
+
+                    document.getElementById("homeHighText").textContent =
+                        countHigh === 0 ? "Nema hemikalija koje ističu uskoro." : `${countHigh} hemikalija ističe u narednih 30 dana.`;
+
+                    document.getElementById("homeOpenedText").textContent =
+                        countOpened === 0 ? "Trenutno nema evidentiranih otvorenih pakovanja." : `Evidentirano je ${countOpened} pakovanja koja su trenutno u upotrebi.`;
+                })
+                .catch(error => console.error("Greška pri učitavanju zaliha za početnu stranu:", error));
+        }
 
 
 </script>
