@@ -154,7 +154,7 @@
     <nav class="sidebar-nav">
         <a href="/home.html">Početna</a>
         <a href="/chemicals.html">Hemikalije</a>
-        <a href="/consumption.html" class="active"> Potrošnja </a>
+        <a href="/consumptions.html" class="active"> Potrošnja </a>
         <a href="/users.html" class="admin-only"> Korisnici </a>
         <a href="/reports.html"> Izveštaji </a>
         <a href="/alerts.html"> Upozorenja </a>
@@ -169,9 +169,15 @@
 
 <div class="content">
 
-    <div class="topbar">
-        <h4>Potrošnja hemikalija</h4>
-        <span><i class="bi bi-person-circle"></i> korisnik</span>
+    <div class="topbar d-flex align-items-center justify-content-between px-4">
+
+        <h4 class="mb-0">Potrošnja hemikalija</h4>
+
+        <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-person-circle" style="font-size: 1.4rem; color: #203a43;"></i>
+            <span id="userName" style="font-weight: 600;">Admin...</span>
+        </div>
+
     </div>
 
     <div class="page-card">
@@ -180,12 +186,12 @@
 
         <div class="filters">
 
-            <input type="text" class="form-control" placeholder="Pretraga...">
+            <input type="text" id="searchInput" class="form-control" placeholder="Pretraga...">
 
         </div>
 
 
-        <div class="table-container">
+        <div class="table-container" id="consumptionTable">
 
             <table class="table table-hover align-middle">
                 <thead>
@@ -273,6 +279,26 @@
 
     </div>
 </div>
+
+<script>
+    const searchInput = document.getElementById("searchInput");
+    const table = document.getElementById("consumptionTable");
+    const rows = table.querySelectorAll("tbody tr");
+
+    searchInput.addEventListener("keyup", function () {
+        const filter = this.value.toLowerCase();
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+
+            if (text.includes(filter)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
