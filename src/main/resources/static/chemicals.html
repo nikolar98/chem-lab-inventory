@@ -288,6 +288,27 @@
             visibility: visible;
         }
 
+        #summaryView {
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            width: 100%;
+        }
+
+        #summaryView table {
+            width: 100% !important;
+            table-layout: fixed;
+            min-width: unset !important;
+        }
+
+        #summaryView th:nth-child(1), #summaryView td:nth-child(1) { width: 45%; }
+        #summaryView th:nth-child(2), #summaryView td:nth-child(2) { width: 25%; }
+        #summaryView th:nth-child(3), #summaryView td:nth-child(3) { width: 30%; }
+
+        #detailsView {
+            overflow-x: auto;
+            width: 100%;
+        }
+
         .admin-only,
         .user-only {
             display: none;
@@ -370,10 +391,6 @@
                 <button class="view-tab" data-view="details">Detaljna evidencija</button>
                 <button class="view-tab" data-view="opened">Otvorene hemikalije</button>
                 <button class="view-tab" data-view="prices">Evidencija cena</button>
-            </div>
-
-            <div class="summary-description" id="summaryDescription">
-                Prikaz trenutne količine hemikalija iste čistoće, bez obzira na lokaciju, proizvođača i zaduženu osobu.
             </div>
 
             <div class="location-tabs" id="locationTabsBlock">
