@@ -41,6 +41,12 @@
             margin-bottom: 10px;
         }
 
+        .user-info {
+            font-size: 0.9rem;
+            color: #5f6f7a;
+            text-align: right;
+        }
+
         .sidebar-nav {
             display: flex;
             flex-direction: column;
@@ -69,6 +75,14 @@
             font-size: 0.9rem;
             color: #cfd8dc;
             margin-bottom: 35px;
+        }
+
+        .sidebar-nav {
+            visibility: hidden;
+        }
+
+        .sidebar-nav.ready {
+            visibility: visible;
         }
 
         .logout {
@@ -136,6 +150,12 @@
         .badge-consumption {
             background: #008b95;
         }
+
+        .admin-only,
+        .user-only {
+            display: none;
+        }
+
     </style>
 </head>
 
@@ -158,6 +178,7 @@
         <a href="/users.html" class="admin-only"> Korisnici </a>
         <a href="/reports.html"> Izveštaji </a>
         <a href="/alerts.html"> Upozorenja </a>
+        <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
         <a href="/requests.html" class="admin-only">Zahtevi</a>
     </nav>
 
@@ -175,7 +196,7 @@
 
         <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
             <i class="bi bi-person-circle" style="font-size: 1.4rem; color: #203a43;"></i>
-            <span id="userName" style="font-weight: 600;">Admin...</span>
+            <span id="userName" style="font-weight: 600;">Učitavanje...</span>
         </div>
 
     </div>
@@ -281,6 +302,41 @@
 </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        loadCurrentUser();
+    });
+
+    function loadCurrentUser() {
+        fetch("/api/current-user")
+            .then(response => response.json())
+            .then(user => {
+                document.getElementById("userName").textContent = `${user.firstName} ${user.lastName}`;
+
+                const roleName = user.role;
+
+                if (roleName === "ADMIN" || roleName === "ROLE_ADMIN") {
+                    document.querySelectorAll(".admin-only").forEach(element => {
+                        element.style.setProperty("display", "block", "important");
+                    });
+                    document.querySelectorAll(".user-only").forEach(element => {
+                        element.style.setProperty("display", "none", "important");
+                    });
+            } else {
+                    document.querySelectorAll(".admin-only").forEach(element => {
+                        element.style.setProperty("display", "none", "important");
+                    });
+                    document.querySelectorAll(".user-only").forEach(element => {
+                        element.style.setProperty("display", "block", "important");
+                    });
+                }
+                document.querySelector(".sidebar-nav").classList.add("ready");
+            })
+            .catch(error => {
+                console.error("Greška pri proveri uloge korisnika:", error);
+                document.querySelector(".sidebar-nav").classList.add("ready");
+            });
+    }
+
     const searchInput = document.getElementById("searchInput");
     const table = document.getElementById("consumptionTable");
     const rows = table.querySelectorAll("tbody tr");
