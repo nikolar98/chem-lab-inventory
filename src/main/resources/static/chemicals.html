@@ -399,6 +399,10 @@
                 <button class="view-tab" data-view="prices">Evidencija cena</button>
             </div>
 
+            <div class="summary-description" id="summaryDescription">
+                Prikaz trenutne količine hemikalija iste čistoće i naziva, bez obzira na lokaciju, proizvođača i zaduženu osobu.
+            </div>
+
             <div class="location-tabs" id="locationTabsBlock">
                 <button class="location-tab active" data-location="all">Sve lokacije</button>
                 <button class="location-tab" data-location="NS bunker">NS bunker</button>
@@ -583,10 +587,10 @@
                             <div class="col-md-12 mt-3">
                                 <label class="form-label fw-bold text-danger">Kritični minimum (Alarm) <i class="bi bi-bell-fill"></i></label>
                                 <div class="input-group">
-                                    <input type="number" step="0.01" min="0" class="form-control border-danger" id="formMinimumAlarm" placeholder="Unesi ispod koje ukupne količine se pali upozorenje">
+                                    <input type="number" step="0.01" min="0" class="form-control border-danger" id="formMinimumAlarm" placeholder="Unesite količinu ispod koje će se prikazivati upozorenje">
                                     <span class="input-group-text bg-danger text-white" id="alarmUnitText">L</span>
                                 </div>
-                                <small class="text-muted">Ostavi prazno ako ne želiš upozorenja za ovu hemikaliju.</small>
+                                <small class="text-muted">Ostavite prazno ako ne želite upozorenja za ovu hemikaliju.</small>
                             </div>
 
                             <div class="col-md-12 mt-3">
@@ -973,7 +977,9 @@
     }
 
     function renderAllTables() {
-        const unopenedBatches = allBatches.filter(batch => !batch.opened);
+        const unopenedBatches = allBatches
+            .filter(batch => !batch.opened)
+            .sort((a, b) => Number(b.id) - Number(a.id));
         const openedBatches = allBatches
             .filter(batch => batch.opened)
             .sort((a, b) => {
@@ -1167,16 +1173,33 @@
 
         if (currentView === "summary") {
             document.getElementById("summaryView").classList.remove("d-none");
-            document.getElementById("summaryDescription").style.display = "block";
+            const summaryDescription = document.getElementById("summaryDescription");
+
+            if (summaryDescription) {
+                summaryDescription.style.display = "block";
+            }
         } else if (currentView === "details") {
             document.getElementById("detailsView").classList.remove("d-none");
-            document.getElementById("summaryDescription").style.display = "none";
+            const summaryDescription = document.getElementById("summaryDescription");
+
+            if (summaryDescription) {
+                summaryDescription.style.display = "none";
+            }
+
         } else if (currentView === "opened") {
             document.getElementById("openedView").classList.remove("d-none");
-            document.getElementById("summaryDescription").style.display = "none";
+            const summaryDescription = document.getElementById("summaryDescription");
+
+            if (summaryDescription) {
+                summaryDescription.style.display = "none";
+            }
         } else if (currentView === "prices") {
             document.getElementById("pricesView").classList.remove("d-none");
-            document.getElementById("summaryDescription").style.display = "none";
+            const summaryDescription = document.getElementById("summaryDescription");
+
+            if (summaryDescription) {
+                summaryDescription.style.display = "none";
+            }
         }
     }
 
@@ -1842,7 +1865,6 @@
                     user: { id: Number(responsibleUserId) },
                     quantity: quantity,
                     unit: batch.packageUnit,
-                    dateTaken: new Date().toISOString(),
                     purpose: "Admin zaduženje",
                     note: note
                 })

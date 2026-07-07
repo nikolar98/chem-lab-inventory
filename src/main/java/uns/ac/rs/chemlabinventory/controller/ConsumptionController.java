@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import uns.ac.rs.chemlabinventory.model.Consumption;
 import uns.ac.rs.chemlabinventory.service.ConsumptionService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -33,6 +34,9 @@ public class ConsumptionController {
 
     @PostMapping
     public Consumption save(@RequestBody Consumption consumption) {
+
+        consumption.setDateTaken(LocalDateTime.now());
+
         return consumptionService.save(consumption);
     }
 

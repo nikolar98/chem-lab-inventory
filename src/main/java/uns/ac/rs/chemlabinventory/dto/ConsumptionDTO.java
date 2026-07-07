@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -32,7 +32,7 @@ public class ConsumptionDTO {
     private String unit;
 
     @NotNull(message = "Datum preuzimanja je obavezan.")
-    private LocalDate dateTaken;
+    private LocalDateTime dateTaken;
 
     @Size(max = 500, message = "Napomena ne sme biti duža od 500 karaktera.")
     private String note;
