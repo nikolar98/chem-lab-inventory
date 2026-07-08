@@ -130,7 +130,11 @@ public class ChemicalBatchService {
 
     public AlertStatsDTO getAlertStats() {
         List<ChemicalBatch> all = chemicalBatchRepository.findAll();
-        long opened = chemicalBatchRepository.countByOpenedTrue();
+        long opened = all.stream()
+                .filter(b -> b.getCurrentQuantity() != null && b.getPackageSize() != null
+                        && b.getPackageSize().compareTo(BigDecimal.ZERO) != 0
+                        && b.getCurrentQuantity().remainder(b.getPackageSize()).compareTo(BigDecimal.ZERO) > 0)
+                .count();
 
         long today = System.currentTimeMillis();
         long thirtyDaysMs = 30L * 24 * 60 * 60 * 1000;
