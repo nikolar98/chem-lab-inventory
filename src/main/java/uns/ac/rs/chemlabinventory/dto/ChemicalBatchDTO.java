@@ -61,4 +61,7 @@ public class ChemicalBatchDTO {
 
     @Size(max = 500, message = "Napomena ne sme biti duža od 500 karaktera.")
     private String note;
+
+    private Integer fullPackagesCount;
+    private BigDecimal openPackageRemainder;
 }

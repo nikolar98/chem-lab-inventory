@@ -83,4 +83,19 @@ public class ChemicalBatch {
 
     @Column(nullable = false)
     private Boolean opened = false;
+
+    @Transient
+    public String getBottleStatus() {
+        if (currentQuantity == null || packageSize == null || packageSize.compareTo(BigDecimal.ZERO) == 0) {
+            return "Stanje: " + currentQuantity + packageUnit;
+        }
+
+        BigDecimal[] divAndRem = currentQuantity.divideAndRemainder(packageSize);
+        int fullBottles = divAndRem[0].intValue();
+        BigDecimal remainder = divAndRem[1];
+
+
+        return String.format("%s %s (pune boce: %d, načeta: %s)",
+                currentQuantity, packageUnit, fullBottles, remainder);
+    }
 }

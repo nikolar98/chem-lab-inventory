@@ -977,26 +977,16 @@
     }
 
     function renderAllTables() {
-        const unopenedBatches = allBatches
-            .filter(batch => !batch.opened)
-            .sort((a, b) => Number(b.id) - Number(a.id));
-        const openedBatches = allBatches
-            .filter(batch => batch.opened)
-            .sort((a, b) => {
-                const aLast = Number(a.lastUsageId || 0);
-                const bLast = Number(b.lastUsageId || 0);
+        const allBatchesSorted = [...allBatches].sort((a, b) => Number(b.id) - Number(a.id));
 
-                if (aLast !== bLast) {
-                    return bLast - aLast;
-                }
+        renderDetailsTable(allBatchesSorted);
+        renderSummaryTable(allBatchesSorted);
 
-                return Number(b.id) - Number(a.id);
-            });
-
-        renderDetailsTable(unopenedBatches);
-        renderSummaryTable(unopenedBatches);
+        const openedBatches = allBatches.filter(batch => batch.opened);
         renderOpenedTable(openedBatches);
-        renderPricesTable(unopenedBatches);
+
+        renderPricesTable(allBatchesSorted);
+
     }
 
     function renderDetailsTable(batches) {
@@ -1013,8 +1003,8 @@
                     <td>${valueOrDash(batch.manufacturerName)}</td>
                     <td>${valueOrDash(batch.purity)}</td>
                     <td>${formatNumber(batch.packageSize)} ${normalizeUnit(batch.packageUnit)}</td>
-                    <td>${valueOrDash(batch.purchasedQuantity)}</td>
-                    <td><strong>${formatNumber(batch.totalQuantity)} ${normalizeUnit(batch.packageUnit)}</strong></td>
+                    <td>${valueOrDash(batch.fullPackagesCount)}</td>
+                    <td><strong>${formatNumber(batch.currentQuantity)} ${normalizeUnit(batch.packageUnit)}</strong></td>
                     <td>${locationName}</td>
                     <td>${responsible}</td>
                     <td>
@@ -1098,8 +1088,7 @@
                     <td>${valueOrDash(batch.chemicalName)}</td>
                     <td>${valueOrDash(batch.manufacturerName)}</td>
                     <td>${valueOrDash(batch.purity)}</td>
-                    <td><strong>${formatNumber(batch.currentQuantity)} ${normalizeUnit(batch.packageUnit)}</strong></td>
-                    <td>${locationName}</td>
+                    <td><strong>${formatNumber(batch.openPackageRemainder)} ${normalizeUnit(batch.packageUnit)}</strong></td>                      <td>${locationName}</td>
                     <td>
     ${currentUserIsAdmin ? `
         <div class="d-flex justify-content-center gap-2">
@@ -2030,6 +2019,8 @@
             `;
         }
     }
+
+
 
     function extractUsageLocation(note) {
         if (!note) return "—";

@@ -90,6 +90,17 @@ public class ChemicalBatchService {
             );
         }
 
+        if (batch.getCurrentQuantity() != null && batch.getPackageSize() != null
+                && batch.getPackageSize().compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal[] divAndRem = batch.getCurrentQuantity().divideAndRemainder(batch.getPackageSize());
+            dto.setFullPackagesCount(divAndRem[0].intValue());
+            dto.setOpenPackageRemainder(divAndRem[1]);
+            dto.setOpened(divAndRem[1].compareTo(BigDecimal.ZERO) > 0);
+        } else {
+            dto.setFullPackagesCount(batch.getPurchasedQuantity());
+            dto.setOpenPackageRemainder(BigDecimal.ZERO);
+        }
+
         dto.setPurity(batch.getPurity());
         dto.setPackageSize(batch.getPackageSize());
         dto.setPackageUnit(batch.getPackageUnit());
@@ -103,6 +114,16 @@ public class ChemicalBatchService {
         dto.setSdsFilePath(batch.getSdsFilePath());
         dto.setCertificateFilePath(batch.getCertificateFilePath());
         dto.setNote(batch.getNote());
+
+        if (batch.getCurrentQuantity() != null && batch.getPackageSize() != null
+                && batch.getPackageSize().compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal[] divAndRem = batch.getCurrentQuantity().divideAndRemainder(batch.getPackageSize());
+            dto.setFullPackagesCount(divAndRem[0].intValue());
+            dto.setOpenPackageRemainder(divAndRem[1]);
+        } else {
+            dto.setFullPackagesCount(batch.getPurchasedQuantity());
+            dto.setOpenPackageRemainder(BigDecimal.ZERO);
+        }
 
         return dto;
     }

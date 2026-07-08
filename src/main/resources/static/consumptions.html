@@ -226,76 +226,14 @@
                     <th>Napomena</th>
                 </tr>
                 </thead>
-
                 <tbody id="consumptionTableBody">
-
-                <tr>
-                    <td>2026-07-06</td>
-                    <td>Etanol</td>
-                    <td><span class="badge badge-consumption">2 L</span></td>
-                    <td>Marko Marković</td>
-                    <td>Lab 1P</td>
-                    <td>Nastava</td>
-                    <td>Standardna vežba</td>
-                </tr>
-
-                <tr>
-                    <td>2026-07-05</td>
-                    <td>Aceton</td>
-                    <td><span class="badge badge-consumption">1.5 L</span></td>
-                    <td>Jelena Petrović</td>
-                    <td>Lab 2A</td>
-                    <td>Analiza</td>
-                    <td>Priprema uzorka</td>
-                </tr>
-
-                <tr>
-                    <td>2026-07-04</td>
-                    <td>HCl (Hlorovodonična kiselina)</td>
-                    <td><span class="badge badge-consumption">0.8 L</span></td>
-                    <td>Petar Ilić</td>
-                    <td>Lab 3B</td>
-                    <td>Eksperiment</td>
-                    <td>Titracija</td>
-                </tr>
-
-                <tr>
-                    <td>2026-07-03</td>
-                    <td>Sumporna kiselina</td>
-                    <td><span class="badge badge-consumption">1 L</span></td>
-                    <td>Ana Jovanović</td>
-                    <td>Lab 1P</td>
-                    <td>Vežbe</td>
-                    <td>Neutralizacija</td>
-                </tr>
-
-                <tr>
-                    <td>2026-07-02</td>
-                    <td>Metanol</td>
-                    <td><span class="badge badge-consumption">3 L</span></td>
-                    <td>Nikola Stojanović</td>
-                    <td>Lab 2C</td>
-                    <td>Istraživanje</td>
-                    <td>Destilacija</td>
-                </tr>
-
-                <tr>
-                    <td>2026-07-01</td>
-                    <td>Izopropanol</td>
-                    <td><span class="badge badge-consumption">2.2 L</span></td>
-                    <td>Milica Kostić</td>
-                    <td>Lab 4A</td>
-                    <td>Higijena</td>
-                    <td>Dezinfekcija opreme</td>
-                </tr>
-
                 </tbody>
             </table>
 
         </div>
 
         <div class="mt-3 text-muted">
-            Ukupno zapisa: <strong>6</strong>
+            Ukupno zapisa: <strong id="totalCount">0</strong>
         </div>
 
     </div>
@@ -304,6 +242,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         loadCurrentUser();
+        loadConsumptions();
     });
 
     function loadCurrentUser() {
@@ -337,12 +276,45 @@
             });
     }
 
+    function loadConsumptions() {
+        fetch("/api/consumptions")
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById("consumptionTableBody");
+                tbody.innerHTML = "";
+
+                document.getElementById("totalCount").textContent = data.length;
+
+                data.forEach(item => {
+                    const dateObj = new Date(item.dateTaken);
+                    const formattedDate = dateObj.toISOString().split('T')[0];
+
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${item.chemicalName|| "/"}</td>
+                    <td>
+                        <span class="badge badge-consumption" title="${item.bottleStatusAfter ? 'Stanje serije: ' + item.bottleStatusAfter : ''}">
+                            ${item.quantity} ${item.unit}
+                        </span>
+                    </td>
+                    <td>${item.userFullName}</td>
+                    <td>${item.locationName || "/"}</td>
+                    <td>${item.purpose || "/"}</td>
+                    <td>${item.note || "/"}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error("Greška pri učitavanju potrošnje:", error));
+    }
+
     const searchInput = document.getElementById("searchInput");
-    const table = document.getElementById("consumptionTable");
-    const rows = table.querySelectorAll("tbody tr");
 
     searchInput.addEventListener("keyup", function () {
         const filter = this.value.toLowerCase();
+
+        const rows = document.querySelectorAll("#consumptionTableBody tr");
 
         rows.forEach(row => {
             const text = row.textContent.toLowerCase();

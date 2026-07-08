@@ -1,11 +1,15 @@
 package uns.ac.rs.chemlabinventory.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import uns.ac.rs.chemlabinventory.dto.ConsumptionDTO;
 import uns.ac.rs.chemlabinventory.model.Consumption;
 import uns.ac.rs.chemlabinventory.service.ConsumptionService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/consumptions")
@@ -18,8 +22,10 @@ public class ConsumptionController {
     }
 
     @GetMapping
-    public List<Consumption> findAll() {
-        return consumptionService.findAll();
+    public List<ConsumptionDTO> findAll() {
+        return consumptionService.findAll().stream()
+                .map(ConsumptionDTO::new)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -32,16 +38,14 @@ public class ConsumptionController {
         return consumptionService.findByChemicalBatchId(batchId);
     }
 
-    @PostMapping
-    public Consumption save(@RequestBody Consumption consumption) {
-
-        consumption.setDateTaken(LocalDateTime.now());
-
-        return consumptionService.save(consumption);
-    }
-
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         consumptionService.delete(id);
+    }
+
+    @PostMapping
+    public ResponseEntity<ConsumptionDTO> save(@Valid @RequestBody ConsumptionDTO consumptionDTO) {
+        ConsumptionDTO savedDTO = consumptionService.createFromDTO(consumptionDTO);
+        return ResponseEntity.ok(savedDTO);
     }
 }

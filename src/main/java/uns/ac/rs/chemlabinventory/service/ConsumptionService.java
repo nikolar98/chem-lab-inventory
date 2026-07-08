@@ -1,18 +1,30 @@
 package uns.ac.rs.chemlabinventory.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import uns.ac.rs.chemlabinventory.dto.ConsumptionDTO;
+import uns.ac.rs.chemlabinventory.model.ChemicalBatch;
 import uns.ac.rs.chemlabinventory.model.Consumption;
+import uns.ac.rs.chemlabinventory.model.User;
+import uns.ac.rs.chemlabinventory.repository.ChemicalBatchRepository;
 import uns.ac.rs.chemlabinventory.repository.ConsumptionRepository;
+import uns.ac.rs.chemlabinventory.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class ConsumptionService {
 
     private final ConsumptionRepository consumptionRepository;
+    private final ChemicalBatchRepository chemicalBatchRepository;
+    private final UserRepository userRepository;
 
-    public ConsumptionService(ConsumptionRepository consumptionRepository) {
+    public ConsumptionService(ConsumptionRepository consumptionRepository, ChemicalBatchRepository chemicalBatchRepository,
+                              UserRepository userRepository) {
         this.consumptionRepository = consumptionRepository;
+        this.chemicalBatchRepository = chemicalBatchRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Consumption> findAll() {
@@ -34,5 +46,34 @@ public class ConsumptionService {
 
     public List<Consumption> findByChemicalBatchId(Long batchId) {
         return consumptionRepository.findByChemicalBatchIdOrderByDateTakenDesc(batchId);
+    }
+
+    @Transactional
+    public ConsumptionDTO createFromDTO(ConsumptionDTO dto) {
+        ChemicalBatch batch = chemicalBatchRepository.findById(dto.getChemicalBatchId())
+                .orElseThrow(() -> new RuntimeException("Serija hemikalije nije pronađena."));
+
+        if (batch.getCurrentQuantity().compareTo(dto.getQuantity()) < 0) {
+            throw new RuntimeException("Nema dovoljno hemikalije na stanju! Trenutno stanje: " + batch.getCurrentQuantity() + " " + batch.getPackageUnit());
+        }
+
+        batch.setCurrentQuantity(batch.getCurrentQuantity().subtract(dto.getQuantity()));
+        batch.setOpened(true);
+        chemicalBatchRepository.save(batch);
+
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Korisnik nije pronađen."));
+
+        Consumption consumption = new Consumption();
+        consumption.setChemicalBatch(batch);
+        consumption.setUser(user);
+        consumption.setQuantity(dto.getQuantity());
+        consumption.setUnit(dto.getUnit());
+        consumption.setDateTaken(LocalDateTime.now());
+        consumption.setNote(dto.getNote());
+
+        consumption = consumptionRepository.save(consumption);
+
+        return new ConsumptionDTO(consumption);
     }
 }
