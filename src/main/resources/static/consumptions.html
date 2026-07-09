@@ -1,162 +1,151 @@
 <!DOCTYPE html>
 <html lang="sr">
+
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hemijska laboratorija - Potrošnja</title>
+
+    <title>Chem Lab Inventory - Potrošnja</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        * { box-sizing: border-box; }
+
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
             background: #f5f7fa;
-            display: flex;
-            min-height: 100vh;
+            color: #203a43;
         }
 
         .sidebar {
             width: 260px;
-            background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+            background: linear-gradient(
+                    180deg,
+                    #0f2027,
+                    #203a43,
+                    #2c5364
+            );
             color: white;
             padding: 28px 18px;
-            display: flex;
-            flex-direction: column;
             position: fixed;
             top: 0;
             bottom: 0;
             left: 0;
-            overflow-y: auto;
-            flex-shrink: 0;
         }
 
         .logo {
             font-size: 1.6rem;
             font-weight: 800;
-            line-height: 1.3;
             margin-bottom: 10px;
         }
 
-        .user-info {
-            font-size: 0.9rem;
-            color: #5f6f7a;
-            text-align: right;
-        }
-
-        .sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .sidebar-nav a {
-            display: block;
-            text-decoration: none;
-            color: #eaf4f7;
-            padding: 13px 16px;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: 0.25s;
-        }
-
-        .sidebar-nav a:hover,
-        .sidebar-nav a.active {
-            background: rgba(0,188,212,0.25);
-            color: white;
-        }
-
         .subtitle {
-            font-size: 0.9rem;
             color: #cfd8dc;
+            font-size: .9rem;
             margin-bottom: 35px;
         }
 
-        .sidebar-nav {
-            visibility: hidden;
+        .sidebar a {
+            display: block;
+            color: #eaf4f7;
+            text-decoration: none;
+            padding: 13px 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .sidebar-nav.ready {
-            visibility: visible;
-        }
-
-        .logout {
-            margin-top: auto;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            padding-top: 22px;
-        }
-
-        .logout button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.12);
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .logout button:hover {
-            background: rgba(255,255,255,0.22);
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: rgba(0, 188, 212, .25);
         }
 
         .content {
             margin-left: 260px;
-            width: calc(100% - 260px);
         }
 
         .topbar {
+            height: 80px;
             background: white;
-            height: 75px;
             border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
         }
 
         .page-card {
             background: white;
-            margin: 20px;
-            padding: 20px;
             border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
         }
 
-        .filters {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
+        .btn-primary-custom {
 
-        .table-container {
-            overflow: auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-        }
-
-        table th {
-            position: sticky;
-            top: 0;
-            background: white;
-        }
-
-        .badge-consumption {
             background: #008b95;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
         }
 
-        .admin-only,
-        .user-only {
-            display: none;
+        .btn-primary-custom:hover {
+            background: #00757e;
+        }
+
+        .stat-card {
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            height: 120px;
+        }
+
+        .stat-card h3 {
+            font-size: 32px;
+            margin: 0;
+        }
+
+        .stat-total {
+            background: linear-gradient(135deg, #203a43, #2c5364);
+        }
+
+        .stat-issued {
+            background: linear-gradient(135deg, #008b95, #00bcd4);
+        }
+
+        .stat-most {
+            background: linear-gradient(135deg, #607d8b, #455a64);
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+        }
+
+        .chart-container {
+            height: 350px;
+        }
+
+        .table th {
+            text-align: center;
+        }
+
+        .table td {
+            text-align: center;
         }
 
     </style>
+
 </head>
 
 <body>
@@ -164,169 +153,650 @@
 <aside class="sidebar">
 
     <div class="logo">
-        Hemijska<br>laboratorija
+        Hemijska<br>
+        laboratorija
     </div>
 
     <div class="subtitle">
         Sistem za evidenciju hemikalija i zaliha
     </div>
 
-    <nav class="sidebar-nav">
-        <a href="/home.html">Početna</a>
-        <a href="/chemicals.html">Hemikalije</a>
-        <a href="/consumptions.html" class="active"> Potrošnja </a>
-        <a href="/users.html" class="admin-only"> Korisnici </a>
-        <a href="/reports.html"> Izveštaji </a>
-        <a href="/alerts.html"> Upozorenja </a>
-        <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
-        <a href="/requests.html" class="admin-only">Zahtevi</a>
-    </nav>
+    <nav>
 
-    <form class="logout" action="/logout" method="post">
-        <button type="submit">Odjava</button>
-    </form>
+        <a href="home.html">
+            Početna
+        </a>
+
+        <a href="chemicals.html">
+            Hemikalije
+        </a>
+
+        <a href="consumptions.html" class="active">
+            Potrošnja
+        </a>
+
+        <a href="users.html">
+            Korisnici
+        </a>
+
+        <a href="reports.html">
+            Izveštaji
+        </a>
+
+        <a href="alerts.html">
+            Upozorenja
+        </a>
+
+    </nav>
 
 </aside>
 
 <div class="content">
 
-    <div class="topbar d-flex align-items-center justify-content-between px-4">
+    <div class="topbar d-flex justify-content-between align-items-center px-4">
 
-        <h4 class="mb-0">Potrošnja hemikalija</h4>
+        <h4>
+            Potrošnja hemikalija
+        </h4>
 
-        <div class="user-info" style="display: flex; align-items: center; gap: 8px;">
-            <i class="bi bi-person-circle" style="font-size: 1.4rem; color: #203a43;"></i>
-            <span id="userName" style="font-weight: 600;">Učitavanje...</span>
+        <div>
+
+            <i class="bi bi-person-circle fs-4"></i>
+
+            <span class="fw-bold">
+                Admin test
+            </span>
+
         </div>
 
     </div>
 
-    <div class="page-card">
+    <div class="container-fluid p-4">
 
-        <h5 class="mb-3">Evidencija potrošnje</h5>
+        <div class="page-card">
 
-        <div class="filters">
+            <h2>
+                Dashboard potrošnje
+            </h2>
 
-            <input type="text" id="searchInput" class="form-control" placeholder="Pretraga...">
+            <p class="text-muted">
 
-        </div>
+                Pregled korišćenja hemikalija kroz vreme.
+
+            </p>
+
+            <div class="row g-4 mt-3">
+
+                <div class="col-md-4">
+
+                    <div class="stat-card stat-total">
+
+                        <h6>
+                            Ukupna potrošnja
+                        </h6>
+
+                        <h3>
+                            345 L
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="stat-card stat-issued">
+
+                        <h6>
+                            Broj izdavanja
+                        </h6>
+
+                        <h3>
+                            124
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="stat-card stat-most">
+
+                        <h6>
+                            Najviše korišćena
+                        </h6>
+
+                        <h3 style="font-size:26px">
+
+                            Etanol
+
+                        </h3>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <hr class="my-4">
+
+            <h5>
+                Filteri
+            </h5>
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+
+                    <label>
+                        Period
+                    </label>
+
+                    <select class="form-select">
+
+                        <option>
+                            Poslednjih 7 dana
+                        </option>
+
+                        <option>
+                            Poslednjih 30 dana
+                        </option>
+
+                        <option>
+                            Ova godina
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label>
+                        Lokacija
+                    </label>
+
+                    <select class="form-select">
+
+                        <option>
+                            Sve lokacije
+                        </option>
+
+                        <option>
+                            Lab 1P
+                        </option>
+
+                        <option>
+                            Superlab
+                        </option>
+
+                        <option>
+                            NS bunker
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label>
+                        Hemikalija
+                    </label>
+
+                    <select class="form-select">
+
+                        <option>
+                            Sve hemikalije
+                        </option>
+
+                        <option>
+                            Etanol
+                        </option>
+
+                        <option>
+                            Metanol
+                        </option>
+
+                        <option>
+                            Aceton
+                        </option>
+
+                        <option>
+                            HCl
+                        </option>
+
+                        <option>
+                            NaOH
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <button class="btn btn-primary-custom mt-3">
+
+                Primeni filter
+
+            </button>
+
+            <div class="chart-card">
 
 
-        <div class="table-container" id="consumptionTable">
+                <h5>
+                    Poslednje potrošnje
+                </h5>
 
-            <table class="table table-hover align-middle">
-                <thead>
-                <tr>
-                    <th>Datum</th>
-                    <th>Hemikalija</th>
-                    <th>Količina</th>
-                    <th>Korisnik</th>
-                    <th>Lokacija</th>
-                    <th>Svrha</th>
-                    <th>Napomena</th>
-                </tr>
-                </thead>
-                <tbody id="consumptionTableBody">
-                </tbody>
-            </table>
+                <div class="table-responsive">
 
-        </div>
+                    <table class="table table-hover align-middle">
 
-        <div class="mt-3 text-muted">
-            Ukupno zapisa: <strong id="totalCount">0</strong>
+                        <thead>
+
+                        <tr>
+
+                            <th>
+                                Datum
+                            </th>
+
+
+                            <th>
+                                Hemikalija
+                            </th>
+
+                            <th>
+                                Čistoća
+                            </th>
+
+                            <th>
+                                Količina
+                            </th>
+
+
+                            <th>
+                                Korisnik
+                            </th>
+
+
+                            <th>
+                                Lokacija
+                            </th>
+
+
+                            <th>
+                                Svrha
+                            </th>
+
+                        </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                        <tr>
+
+                            <td>
+                                2026-07-06
+                            </td>
+
+                            <td>
+                                Etanol
+                            </td>
+
+                            <td>
+                                96%
+                            </td>
+
+                            <td>
+                                2 L
+                            </td>
+
+                            <td>
+                                Marko Marković
+                            </td>
+
+                            <td>
+                                Lab 1P
+                            </td>
+
+                            <td>
+                                Nastava
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>
+                                2026-07-05
+                            </td>
+
+                            <td>
+                                Aceton
+                            </td>
+
+                            <td>
+                                98%
+                            </td>
+
+                            <td>
+                                1.5 L
+                            </td>
+
+                            <td>
+                                Ana Petrović
+                            </td>
+
+                            <td>
+                                Superlab
+                            </td>
+
+                            <td>
+                                Istraživanje
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>
+                                2026-07-03
+                            </td>
+
+                            <td>
+                                HCl
+                            </td>
+
+                            <td>
+                                96%
+                            </td>
+
+                            <td>
+                                0.8 L
+                            </td>
+
+                            <td>
+                                Nikola Nikolić
+                            </td>
+
+                            <td>
+                                NS bunker
+                            </td>
+
+                            <td>
+                                Laboratorija
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>
+                                2026-07-01
+                            </td>
+
+                            <td>
+                                NaOH
+                            </td>
+
+                            <td>
+                                96%
+                            </td>
+
+                            <td>
+                                3 kg
+                            </td>
+
+                            <td>
+                                Jovana Ilić
+                            </td>
+
+                            <td>
+                                Lab 1P
+                            </td>
+
+                            <td>
+                                Eksperiment
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>
+                                2026-06-28
+                            </td>
+
+                            <td>
+                                Metanol
+                            </td>
+
+                            <td>
+                                94%
+                            </td>
+
+                            <td>
+                                4 L
+                            </td>
+
+                            <td>
+                                Marko Marković
+                            </td>
+
+                            <td>
+                                Superlab
+                            </td>
+
+                            <td>
+                                Nastava
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+            </div>
+
+            <div class="chart-card">
+
+                <h5>
+                    Top 5 najtrošenijih hemikalija.
+                </h5>
+
+                <p class="text-muted">
+                    Hemikalije sa najvećom ukupnom potrošnjom.
+                </p>
+
+                <div class="chart-container">
+
+                    <canvas id="topChart"></canvas>
+
+                </div>
+
+            </div>
+
+            <div class="chart-card">
+
+                <h5>
+                    Potrošnja kroz mesece
+                </h5>
+
+
+                <p class="text-muted">
+                    Pregled mesečne potrošnje hemikalija.
+                </p>
+
+
+                <div class="chart-container">
+
+                    <canvas id="monthlyChart"></canvas>
+
+                </div>
+
+            </div>
+
+            <div class="chart-card">
+
+                <h5>
+                    Potrošnja top 5 hemikalija po ceni.
+                </h5>
+
+                <p class="text-muted">
+                    Pregled potrošnje po ceni (RSD).
+                </p>
+
+                <div class="chart-container">
+
+                    <canvas id="priceChart"></canvas>
+
+                </div>
+
+            </div>
+
+            </div>
+
+
         </div>
 
     </div>
-</div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        loadCurrentUser();
-        loadConsumptions();
-    });
+    <script>
 
-    function loadCurrentUser() {
-        fetch("/api/current-user")
-            .then(response => response.json())
-            .then(user => {
-                document.getElementById("userName").textContent = `${user.firstName} ${user.lastName}`;
+        new Chart(
+            document.getElementById("topChart"),
+            {
+                type: "bar",
+                data: {
+                    labels: [
+                        "Etanol (96%)",
+                        "Metanol (99.9%)",
+                        "Aceton (99%)",
+                        "HCl (37%)",
+                        "NaOH (98%)"
+                    ],
 
-                const roleName = user.role;
+                    datasets: [{
+                        label: "Litara / kilograma",
+                        data: [
+                            120,
+                            90,
+                            65,
+                            50,
+                            45
+                        ]
+                    }]
+                },
 
-                if (roleName === "ADMIN" || roleName === "ROLE_ADMIN") {
-                    document.querySelectorAll(".admin-only").forEach(element => {
-                        element.style.setProperty("display", "block", "important");
-                    });
-                    document.querySelectorAll(".user-only").forEach(element => {
-                        element.style.setProperty("display", "none", "important");
-                    });
-            } else {
-                    document.querySelectorAll(".admin-only").forEach(element => {
-                        element.style.setProperty("display", "none", "important");
-                    });
-                    document.querySelectorAll(".user-only").forEach(element => {
-                        element.style.setProperty("display", "block", "important");
-                    });
+                options: {
+                    indexAxis: "y",
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
-                document.querySelector(".sidebar-nav").classList.add("ready");
-            })
-            .catch(error => {
-                console.error("Greška pri proveri uloge korisnika:", error);
-                document.querySelector(".sidebar-nav").classList.add("ready");
             });
-    }
 
-    function loadConsumptions() {
-        fetch("/api/consumptions")
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById("consumptionTableBody");
-                tbody.innerHTML = "";
+        new Chart(
+            document.getElementById("monthlyChart"),
+            {
+                type: "line",
+                data: {
+                    labels: [
+                        "Etanol (96%)",
+                        "Metanol (99.9%)",
+                        "Aceton (99%)",
+                        "HCl (37%)",
+                        "NaOH (98%)"
+                    ],
+                    datasets: [{
+                        label: "Potrošnja (L)",
+                        data: [
+                            35,
+                            42,
+                            55,
+                            48,
+                            70,
+                            60,
+                            85
+                        ],
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
 
-                document.getElementById("totalCount").textContent = data.length;
+        new Chart(
+            document.getElementById("priceChart"),
+            {
+                type: "bar",
+                data: {
+                    labels: [
+                        "Etanol (96%)",
+                        "Metanol (99.9%)",
+                        "Aceton (99%)",
+                        "HCl (37%)",
+                        "NaOH (98%)"
+                    ],
+                    datasets: [{
+                        label: "Potrošnja po ceni (RSD)",
+                        data: [
+                            185000,
+                            142000,
+                            98000,
+                            76000,
+                            52000
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
 
-                data.forEach(item => {
-                    const dateObj = new Date(item.dateTaken);
-                    const formattedDate = dateObj.toISOString().split('T')[0];
+                            callbacks: {
+                                label: function(context) {
 
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                    <td>${formattedDate}</td>
-                    <td>${item.chemicalName|| "/"}</td>
-                    <td>
-                        <span class="badge badge-consumption" title="${item.bottleStatusAfter ? 'Stanje serije: ' + item.bottleStatusAfter : ''}">
-                            ${item.quantity} ${item.unit}
-                        </span>
-                    </td>
-                    <td>${item.userFullName}</td>
-                    <td>${item.locationName || "/"}</td>
-                    <td>${item.purpose || "/"}</td>
-                    <td>${item.note || "/"}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            })
-            .catch(error => console.error("Greška pri učitavanju potrošnje:", error));
-    }
+                                    return context.raw.toLocaleString("sr-RS") + " RSD";
+                                }
+                            }
+                        }
+                    }
+                }
+            });
 
-    const searchInput = document.getElementById("searchInput");
+    </script>
 
-    searchInput.addEventListener("keyup", function () {
-        const filter = this.value.toLowerCase();
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-        const rows = document.querySelectorAll("#consumptionTableBody tr");
+    <script>
 
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
 
-            if (text.includes(filter)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        });
-    });
-</script>
+                console.log(
+                    "Consumptions page loaded"
+                );
+
+            });
+    </script>
+
+
 
 </body>
+
+
 </html>
