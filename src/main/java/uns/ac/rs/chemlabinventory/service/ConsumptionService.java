@@ -5,9 +5,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uns.ac.rs.chemlabinventory.dto.ConsumptionDTO;
 import uns.ac.rs.chemlabinventory.model.ChemicalBatch;
 import uns.ac.rs.chemlabinventory.model.Consumption;
+import uns.ac.rs.chemlabinventory.model.Location;
 import uns.ac.rs.chemlabinventory.model.User;
 import uns.ac.rs.chemlabinventory.repository.ChemicalBatchRepository;
 import uns.ac.rs.chemlabinventory.repository.ConsumptionRepository;
+import uns.ac.rs.chemlabinventory.repository.LocationRepository;
 import uns.ac.rs.chemlabinventory.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -19,12 +21,14 @@ public class ConsumptionService {
     private final ConsumptionRepository consumptionRepository;
     private final ChemicalBatchRepository chemicalBatchRepository;
     private final UserRepository userRepository;
+    private final LocationRepository locationRepository;
 
     public ConsumptionService(ConsumptionRepository consumptionRepository, ChemicalBatchRepository chemicalBatchRepository,
-                              UserRepository userRepository) {
+                              UserRepository userRepository, LocationRepository locationRepository) {
         this.consumptionRepository = consumptionRepository;
         this.chemicalBatchRepository = chemicalBatchRepository;
         this.userRepository = userRepository;
+        this.locationRepository = locationRepository;
     }
 
     public List<Consumption> findAll() {
@@ -59,6 +63,16 @@ public class ConsumptionService {
 
         batch.setCurrentQuantity(batch.getCurrentQuantity().subtract(dto.getQuantity()));
         batch.setOpened(true);
+        if (dto.getLocationName() != null && !dto.getLocationName().isBlank()) {
+            Location location = locationRepository.findByNameIgnoreCase(dto.getLocationName().trim())
+                    .orElseThrow(() ->
+                            new RuntimeException(
+                                    "Lokacija nije pronađena: " + dto.getLocationName()
+                            )
+                    );
+
+            batch.setLocation(location);
+        }
         chemicalBatchRepository.save(batch);
 
         User user = userRepository.findById(dto.getUserId())
@@ -71,6 +85,7 @@ public class ConsumptionService {
         consumption.setUnit(dto.getUnit());
         consumption.setDateTaken(LocalDateTime.now());
         consumption.setNote(dto.getNote());
+        consumption.setPurpose(dto.getPurpose());
 
         consumption = consumptionRepository.save(consumption);
 

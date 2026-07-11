@@ -12,5 +12,4 @@ public interface ConsumptionRepository extends JpaRepository<Consumption, Long> 
 
     Optional<Consumption> findFirstByChemicalBatchIdOrderByDateTakenDesc(Long chemicalBatchId);
 
-    Optional<Consumption> findFirstByChemicalBatchIdOrderByIdDesc(Long chemicalBatchId);
 }

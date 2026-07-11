@@ -46,9 +46,7 @@ public class ChemicalBatchDTO {
     private LocalDate expirationDate;
 
     private BigDecimal packagePrice;
-
     private BigDecimal totalPrice;
-
     private BigDecimal minimumQuantityAlarm;
 
     private boolean opened;

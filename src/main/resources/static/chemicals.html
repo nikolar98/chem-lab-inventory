@@ -466,7 +466,7 @@
                         <th class="sortable" onclick="sortTable('openedTableBody', 1, 'text', this)">Proizvođač <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('openedTableBody', 2, 'text', this)">Čistoća <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('openedTableBody', 3, 'number', this)">Trenutna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th class="sortable" onclick="sortTable('openedTableBody', 4, 'text', this)">Lokacija <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('openedTableBody', 4, 'text', this)">Trenutna lokacija <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th>Akcije</th>
                         <th>Istorija zaduženja</th>
                     </tr>
@@ -734,6 +734,17 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label fw-bold">Svrha potrošnje *</label>
+                            <select class="form-select" id="editPurpose" required>
+                                <option value="">Izaberi svrhu...</option>
+                                <option value="Nastava">Nastava</option>
+                                <option value="Laboratorija">Laboratorija</option>
+                                <option value="Nauka">Nauka</option>
+                                <option value="Drugo">Drugo</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label fw-bold">Količina za zaduženje *</label>
                             <div class="input-group">
                                 <input type="number" step="0.001" min="0.001" class="form-control" id="editUsageQuantity" required>
@@ -979,10 +990,30 @@
     function renderAllTables() {
         const allBatchesSorted = [...allBatches].sort((a, b) => Number(b.id) - Number(a.id));
 
-        renderDetailsTable(allBatchesSorted);
+        const closedBatches = allBatchesSorted.filter(batch => !batch.opened);
+        renderDetailsTable(closedBatches);
+
         renderSummaryTable(allBatchesSorted);
 
-        const openedBatches = allBatches.filter(batch => batch.opened);
+        const openedBatches = allBatches
+            .filter(batch => batch.opened)
+            .sort((a, b) => {
+                const dateA = a.lastUsageDate
+                    ? new Date(a.lastUsageDate).getTime()
+                    : 0;
+
+                const dateB = b.lastUsageDate
+                    ? new Date(b.lastUsageDate).getTime()
+                    : 0;
+
+                if (dateB !== dateA) {
+                    return dateB - dateA;
+                }
+
+                return Number(b.lastUsageId || b.id || 0)
+                    - Number(a.lastUsageId || a.id || 0);
+            });
+
         renderOpenedTable(openedBatches);
 
         renderPricesTable(allBatchesSorted);
@@ -1444,7 +1475,9 @@
     }
 
     async function openEditDataModal(batchId) {
-        const batch = allBatches.find(item => Number(item.id) === Number(batchId));
+        const batch = allBatches.find(
+            item => Number(item.id) === Number(batchId)
+        );
 
         if (!batch) {
             alert("Hemikalija nije pronađena u učitanim podacima.");
@@ -1452,33 +1485,53 @@
         }
 
         document.getElementById("editDataBatchId").value = batch.id;
-        document.getElementById("editDataChemicalName").value = batch.chemicalName || "";
-        document.getElementById("editDataPurity").value = batch.purity || "";
-        document.getElementById("editDataPackageSize").value = batch.packageSize ?? "";
-        document.getElementById("editDataPackageUnit").value = normalizeUnit(batch.packageUnit) || "L";
-        document.getElementById("editDataPackagePrice").value = batch.packagePrice ?? "";
-        document.getElementById("editDataNote").value = batch.note || "";
-        document.getElementById("editDataExpirationDate").value = batch.expirationDate ? batch.expirationDate.split('T')[0] : "";
-        document.getElementById("editDataCustomLocation").value = "";
+        document.getElementById("editDataChemicalName").value =
+            batch.chemicalName || "";
+
+        document.getElementById("editDataManufacturer").value =
+            batch.manufacturerName || "";
+
+        document.getElementById("editDataPurity").value =
+            batch.purity || "";
+
+        document.getElementById("editDataLocation").value =
+            batch.locationName || "";
+
+        document.getElementById("editDataPackageSize").value =
+            batch.packageSize ?? "";
+
+        document.getElementById("editDataPackageUnit").value =
+            normalizeUnit(batch.packageUnit) || "L";
+
+        document.getElementById("editDataPackagePrice").value =
+            batch.packagePrice ?? "";
+
+        const cleanedNote = cleanHistoryNote(batch.note);
+        document.getElementById("editDataNote").value =
+            cleanedNote === "—" ? "" : cleanedNote;
+
+        document.getElementById("editDataExpirationDate").value =
+            batch.expirationDate
+                ? batch.expirationDate.split("T")[0]
+                : "";
 
         await loadDataEditOptions(batch);
 
-        const modal = new bootstrap.Modal(document.getElementById("editDataModal"));
+        const modal = new bootstrap.Modal(
+            document.getElementById("editDataModal")
+        );
+
         modal.show();
     }
 
     async function loadDataEditOptions(batch) {
         const chemList = document.getElementById("editChemNameList");
-        const manufacturerSelect = document.getElementById("editDataManufacturer");
-        const locationSelect = document.getElementById("editDataLocation");
         const manList = document.getElementById("editManufacturerList");
         const locList = document.getElementById("editLocationList");
         manList.innerHTML = "";
         locList.innerHTML = "";
 
         chemList.innerHTML = "";
-        manufacturerSelect.innerHTML = '<option value="">Bez proizvođača</option>';
-        locationSelect.innerHTML = '<option value="">Bez lokacije</option>';
 
         const fetchJson = async (url) => {
             const response = await fetch(url);
@@ -1564,7 +1617,7 @@
             const payload = {
                 id: Number(batch.id),
                 chemical: { id: chemical.id },
-                manufacturer: manufacturerId ? { id: Number(manufacturerId) } : null,
+                manufacturer: manufacturer ? { id: Number(manufacturer.id) } : null,
                 location: location ? { id: Number(location.id) } : null,
                 responsibleUser: batch.responsibleUserId ? { id: Number(batch.responsibleUserId) } : null,
                 purity: purity,
@@ -1796,7 +1849,6 @@
             return;
         }
 
-        const newQuantity = availableQuantity - usageQuantity;
         const noteParts = [`Zadužena osoba: ${responsibleUserText}`];
 
         if (usageLocation) {
@@ -1810,21 +1862,6 @@
         const finalNote = noteParts.join("; ");
 
         try {
-            const response = await fetch(`/api/chemical-batches/${batchId}/quantity`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    currentQuantity: newQuantity,
-                    note: finalNote
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error("Greška pri zaduživanju hemikalije.");
-            }
-
-            await response.json();
-
             await createAdminConsumptionRecord(batch, responsibleUserId, usageQuantity, finalNote);
 
             bootstrap.Modal.getInstance(document.getElementById("editQuantityModal")).hide();
@@ -1844,22 +1881,33 @@
         }
     }
 
-    async function createAdminConsumptionRecord(batch, responsibleUserId, quantity, note) {
-        try {
-            await fetch("/api/consumptions", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chemicalBatch: { id: Number(batch.id) },
-                    user: { id: Number(responsibleUserId) },
-                    quantity: quantity,
-                    unit: batch.packageUnit,
-                    purpose: "Admin zaduženje",
-                    note: note
-                })
-            });
-        } catch (error) {
-            console.warn("Istorija zaduženja nije automatski upisana.", error);
+    async function createAdminConsumptionRecord(
+        batch,
+        responsibleUserId,
+        quantity,
+        note
+    ) {
+        const response = await fetch("/api/consumptions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                chemicalBatchId: Number(batch.id),
+                userId: Number(responsibleUserId),
+                quantity: Number(quantity),
+                unit: batch.packageUnit,
+                dateTaken: new Date().toISOString().slice(0, 19),
+                purpose: document.getElementById("editPurpose").value,
+                locationName: getUsageLocationText("edit"),
+                note: note
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(
+                "Količina je smanjena, ali istorija zaduženja nije upisana."
+            );
         }
     }
 
@@ -2020,6 +2068,14 @@
         }
     }
 
+    function cleanHistoryNote(note) {
+        if (!note) return "—";
+
+        return note
+            .replace(/Zadužena osoba:\s*[^;]+;?\s*/i, "")
+            .replace(/Lokacija korišćenja:\s*[^;]+;?\s*/i, "")
+            .trim() || "—";
+    }
 
 
     function extractUsageLocation(note) {
@@ -2029,12 +2085,15 @@
         return match ? match[1].trim() : "—";
     }
 
-    function cleanHistoryNote(note) {
-        if (!note) return "—";
 
-        return note
-            .replace(/Lokacija korišćenja:\s*[^;]+;?\s*/i, "")
-            .trim() || "—";
+    function getCurrentBatchLocation(batch) {
+        const usageLocation = extractUsageLocation(batch?.note);
+
+        if (usageLocation && usageLocation !== "—") {
+            return usageLocation;
+        }
+
+        return normalizeLocation(batch?.locationName);
     }
 
     function formatDateTime(value) {

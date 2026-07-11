@@ -16,14 +16,17 @@ public class ChemicalBatchService {
     private final ChemicalBatchRepository chemicalBatchRepository;
     private final ConsumptionRepository consumptionRepository;
 
-    public ChemicalBatchService(ChemicalBatchRepository chemicalBatchRepository, ConsumptionRepository consumptionRepository) {
+    public ChemicalBatchService(
+            ChemicalBatchRepository chemicalBatchRepository,
+            ConsumptionRepository consumptionRepository
+    ) {
         this.chemicalBatchRepository = chemicalBatchRepository;
         this.consumptionRepository = consumptionRepository;
     }
 
     public ChemicalBatch findById(Long id) {
         return chemicalBatchRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Zaliha nije pronadjena."));
+                .orElseThrow(() -> new RuntimeException("Zaliha nije pronađena."));
     }
 
     public ChemicalBatch save(ChemicalBatch chemicalBatch) {
@@ -49,7 +52,9 @@ public class ChemicalBatchService {
         batch.setCurrentQuantity(newQuantity);
         batch.setNote(note);
 
-        if (oldQuantity != null && newQuantity != null && newQuantity.compareTo(oldQuantity) < 0) {
+        if (oldQuantity != null
+                && newQuantity != null
+                && newQuantity.compareTo(oldQuantity) < 0) {
             batch.setOpened(true);
         }
 
@@ -60,17 +65,19 @@ public class ChemicalBatchService {
         ChemicalBatchDTO dto = new ChemicalBatchDTO();
 
         dto.setId(batch.getId());
+        dto.setOpened(Boolean.TRUE.equals(batch.getOpened()));
 
-        dto.setOpened(batch.getOpened());
-
-        consumptionRepository.findFirstByChemicalBatchIdOrderByIdDesc(batch.getId())
+        consumptionRepository
+                .findFirstByChemicalBatchIdOrderByDateTakenDesc(batch.getId())
                 .ifPresent(consumption -> {
                     dto.setLastUsageDate(consumption.getDateTaken());
                     dto.setLastUsageId(consumption.getId());
                 });
 
-        dto.setChemicalId(batch.getChemical().getId());
-        dto.setChemicalName(batch.getChemical().getName());
+        if (batch.getChemical() != null) {
+            dto.setChemicalId(batch.getChemical().getId());
+            dto.setChemicalName(batch.getChemical().getName());
+        }
 
         if (batch.getManufacturer() != null) {
             dto.setManufacturerId(batch.getManufacturer().getId());
@@ -85,20 +92,10 @@ public class ChemicalBatchService {
         if (batch.getResponsibleUser() != null) {
             dto.setResponsibleUserId(batch.getResponsibleUser().getId());
             dto.setResponsibleUserFullName(
-                    batch.getResponsibleUser().getFirstName() + " " +
-                            batch.getResponsibleUser().getLastName()
+                    batch.getResponsibleUser().getFirstName()
+                            + " "
+                            + batch.getResponsibleUser().getLastName()
             );
-        }
-
-        if (batch.getCurrentQuantity() != null && batch.getPackageSize() != null
-                && batch.getPackageSize().compareTo(BigDecimal.ZERO) != 0) {
-            BigDecimal[] divAndRem = batch.getCurrentQuantity().divideAndRemainder(batch.getPackageSize());
-            dto.setFullPackagesCount(divAndRem[0].intValue());
-            dto.setOpenPackageRemainder(divAndRem[1]);
-            dto.setOpened(divAndRem[1].compareTo(BigDecimal.ZERO) > 0);
-        } else {
-            dto.setFullPackagesCount(batch.getPurchasedQuantity());
-            dto.setOpenPackageRemainder(BigDecimal.ZERO);
         }
 
         dto.setPurity(batch.getPurity());
@@ -115,9 +112,13 @@ public class ChemicalBatchService {
         dto.setCertificateFilePath(batch.getCertificateFilePath());
         dto.setNote(batch.getNote());
 
-        if (batch.getCurrentQuantity() != null && batch.getPackageSize() != null
+        if (batch.getCurrentQuantity() != null
+                && batch.getPackageSize() != null
                 && batch.getPackageSize().compareTo(BigDecimal.ZERO) != 0) {
-            BigDecimal[] divAndRem = batch.getCurrentQuantity().divideAndRemainder(batch.getPackageSize());
+
+            BigDecimal[] divAndRem =
+                    batch.getCurrentQuantity().divideAndRemainder(batch.getPackageSize());
+
             dto.setFullPackagesCount(divAndRem[0].intValue());
             dto.setOpenPackageRemainder(divAndRem[1]);
         } else {
@@ -130,27 +131,37 @@ public class ChemicalBatchService {
 
     public AlertStatsDTO getAlertStats() {
         List<ChemicalBatch> all = chemicalBatchRepository.findAll();
+
         long opened = all.stream()
-                .filter(b -> b.getCurrentQuantity() != null && b.getPackageSize() != null
-                        && b.getPackageSize().compareTo(BigDecimal.ZERO) != 0
-                        && b.getCurrentQuantity().remainder(b.getPackageSize()).compareTo(BigDecimal.ZERO) > 0)
+                .filter(batch -> Boolean.TRUE.equals(batch.getOpened()))
                 .count();
 
         long today = System.currentTimeMillis();
         long thirtyDaysMs = 30L * 24 * 60 * 60 * 1000;
+
         long critical = 0;
         long expiring = 0;
 
-        for (ChemicalBatch b : all) {
-            if (b.getMinimumQuantityAlarm() != null && b.getCurrentQuantity() != null) {
-                if (b.getCurrentQuantity().compareTo(b.getMinimumQuantityAlarm()) <= 0) critical++;
+        for (ChemicalBatch batch : all) {
+            if (batch.getMinimumQuantityAlarm() != null
+                    && batch.getCurrentQuantity() != null
+                    && batch.getCurrentQuantity()
+                    .compareTo(batch.getMinimumQuantityAlarm()) <= 0) {
+                critical++;
             }
-            if (b.getExpirationDate() != null) {
-                long expDate = java.sql.Date.valueOf(b.getExpirationDate()).getTime();
-                if (expDate < today) critical++;
-                else if (expDate <= (today + thirtyDaysMs)) expiring++;
+
+            if (batch.getExpirationDate() != null) {
+                long expirationDate =
+                        java.sql.Date.valueOf(batch.getExpirationDate()).getTime();
+
+                if (expirationDate < today) {
+                    critical++;
+                } else if (expirationDate <= today + thirtyDaysMs) {
+                    expiring++;
+                }
             }
         }
+
         return new AlertStatsDTO(critical, expiring, opened);
     }
 }
