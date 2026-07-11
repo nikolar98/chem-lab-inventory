@@ -286,6 +286,30 @@
             border-radius: 10px;
         }
 
+        #historyTableBody td,
+        #historyModal thead th {
+            border-right: 1px solid #dee2e6;
+        }
+
+        #historyModal thead th:last-child,
+        #historyTableBody td:last-child {
+            border-right: none;
+        }
+        #historyModal table {
+            border: 1px solid #dee2e6;
+        }
+
+        #historyModal th,
+        #historyModal td {
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        #historyModal th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
         .sidebar-nav {
             visibility: hidden;
         }
@@ -465,8 +489,10 @@
                         <th class="sortable" onclick="sortTable('openedTableBody', 0, 'text', this)">Naziv hemikalije <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('openedTableBody', 1, 'text', this)">Proizvođač <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th class="sortable" onclick="sortTable('openedTableBody', 2, 'text', this)">Čistoća <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th class="sortable" onclick="sortTable('openedTableBody', 3, 'number', this)">Trenutna količina <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                        <th class="sortable" onclick="sortTable('openedTableBody', 4, 'text', this)">Trenutna lokacija <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th class="sortable" onclick="sortTable('openedTableBody', 3, 'number', this)">Ukupna količina<br>svih pakovanja<i class="bi bi-arrow-down-up sort-icon"></i></th>
+                        <th>Puna pakovanja</th>
+                        <th>Otvoreno pakovanje</th>
+                        <th class="sortable" onclick="sortTable('openedTableBody', 6, 'text', this)">Trenutna lokacija <i class="bi bi-arrow-down-up sort-icon"></i></th>
                         <th>Akcije</th>
                         <th>Istorija zaduženja</th>
                     </tr>
@@ -850,12 +876,15 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-sm align-middle">
+                    <table class="table table-sm table-bordered align-middle">
                         <thead>
                         <tr>
                             <th>Datum</th>
                             <th>Korisnik</th>
-                            <th>Količina</th>
+                            <th>
+                                Zadužena<br>
+                                količina
+                            </th>
                             <th>Svrha</th>
                             <th>Lokacija</th>
                             <th>Napomena</th>
@@ -1119,7 +1148,10 @@
                     <td>${valueOrDash(batch.chemicalName)}</td>
                     <td>${valueOrDash(batch.manufacturerName)}</td>
                     <td>${valueOrDash(batch.purity)}</td>
-                    <td><strong>${formatNumber(batch.openPackageRemainder)} ${normalizeUnit(batch.packageUnit)}</strong></td>                      <td>${locationName}</td>
+                    <td><strong>${formatNumber(batch.currentQuantity)} ${normalizeUnit(batch.packageUnit)}</strong></td>
+                    <td>${valueOrDash(batch.fullPackagesCount)}</td>
+                    <td><strong>${formatNumber(batch.openPackageRemainder)} ${normalizeUnit(batch.packageUnit)}</strong></td>
+                    <td>${locationName}</td>
                     <td>
     ${currentUserIsAdmin ? `
         <div class="d-flex justify-content-center gap-2">
