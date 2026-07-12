@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -67,5 +68,6 @@ public class Request {
     @Column(name = "purpose", length = 255)
     private String purpose;
 
-
+    @Column(name = "needed_date")
+    private LocalDate neededDate;
 }

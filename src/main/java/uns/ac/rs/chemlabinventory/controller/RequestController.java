@@ -8,6 +8,8 @@ import uns.ac.rs.chemlabinventory.service.RequestService;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -40,11 +42,17 @@ public class RequestController {
         String purpose = body.get("purpose").toString();
         String comment = body.get("comment") != null ? body.get("comment").toString() : "";
 
+        LocalDate neededDate = null;
+        if (body.get("neededDate") != null && !body.get("neededDate").toString().isEmpty()) {
+            neededDate = LocalDate.parse(body.get("neededDate").toString());
+        }
+
         Request request = requestService.createChemicalUsageRequest(
                 chemicalBatchId,
                 requestedQuantity,
                 purpose,
                 comment,
+                neededDate,
                 principal.getName()
         );
 

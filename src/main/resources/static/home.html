@@ -302,6 +302,20 @@
             display: none;
         }
 
+        .sidebar-nav a {
+            position: relative;
+        }
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #20c997;
+            border-radius: 50%;
+            position: absolute;
+            top: 22px;
+            right: 25px;
+            box-shadow: 0 0 6px rgba(32, 201, 151, 0.6);
+            display: none;
+        }
     </style>
 </head>
 
@@ -325,7 +339,7 @@
         <a href="/reports.html"> Izveštaji </a>
         <a href="/alerts.html"> Upozorenja </a>
         <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
-        <a href="/requests.html" class="admin-only">Zahtevi</a>
+        <a href="/requests.html" class="admin-only">Zahtevi <span id="requestsBadge" class="notification-dot"></span></a>
     </nav>
 
     <form class="logout" action="/logout" method="post">
@@ -448,10 +462,6 @@
         loadUserInfo();
     });
 
-    if (email) {
-        document.getElementById("userEmail").textContent = email;
-    }
-
     fetch("/api/current-user")
         .then(response => response.json())
         .then(user => {
@@ -466,6 +476,17 @@
                 document.querySelectorAll(".user-only").forEach(element => {
                     element.style.display = "none";
                 });
+
+                fetch("/api/requests")
+                    .then(res => res.json())
+                    .then(allRequests => {
+                        const hasPending = allRequests.some(req => req.status !== "APPROVED" && req.status !== "REJECTED");
+                        if (hasPending) {
+                            const badge = document.getElementById("requestsBadge");
+                            if (badge) badge.style.display = "block";
+                        }
+                    })
+                    .catch(err => console.error("Greška pri proveri zahteva:", err));
 
             } else {
 

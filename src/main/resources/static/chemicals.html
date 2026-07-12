@@ -344,6 +344,21 @@
             display: none;
         }
 
+        .sidebar-nav a {
+            position: relative;
+        }
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #20c997;
+            border-radius: 50%;
+            position: absolute;
+            top: 22px;
+            right: 25px;
+            box-shadow: 0 0 6px rgba(32, 201, 151, 0.6);
+            display: none;
+        }
+
     </style>
 </head>
 
@@ -367,7 +382,7 @@
         <a href="/reports.html"> Izveštaji </a>
         <a href="/alerts.html"> Upozorenja </a>
         <a href="/my-requests.html" class="user-only">Moji zahtevi</a>
-        <a href="/requests.html" class="admin-only">Zahtevi</a>
+        <a href="/requests.html" class="admin-only">Zahtevi <span id="requestsBadge" class="notification-dot"></span></a>
     </nav>
 
     <form class="logout" action="/logout" method="post">
@@ -835,6 +850,11 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label fw-bold">Datum preuzimanja (Max 3 dana unapred) *</label>
+                            <input type="date" class="form-control" id="requestNeededDate" required>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label fw-bold">Svrha potrošnje *</label>
                             <select class="form-select" id="requestPurpose" required>
                                 <option value="">Izaberi svrhu...</option>
@@ -939,6 +959,17 @@
                 document.querySelectorAll(".user-only").forEach(element => {
                     element.style.setProperty("display", "none", "important");
                 });
+
+                fetch("/api/requests")
+                    .then(res => res.json())
+                    .then(allRequests => {
+                        const hasPending = allRequests.some(req => req.status !== "APPROVED" && req.status !== "REJECTED");
+                        if (hasPending) {
+                            const badge = document.getElementById("requestsBadge");
+                            if (badge) badge.style.display = "block";
+                        }
+                    })
+                    .catch(err => console.error("Greška pri proveri zahteva:", err));
 
                 renderAllTables();
                 applyFilters();
@@ -1968,12 +1999,24 @@
         document.getElementById("requestUsageCustomLocation").value = "";
         loadUsageLocations("request", batch.locationName);
 
+        const dateInput = document.getElementById("requestNeededDate");
+        const today = new Date();
+        const maxDate = new Date();
+        maxDate.setDate(today.getDate() + 3);
+
+        const formatDate = (d) => d.toISOString().split('T')[0];
+
+        dateInput.min = formatDate(today);
+        dateInput.max = formatDate(maxDate);
+        dateInput.value = formatDate(today);
+
         const modal = new bootstrap.Modal(document.getElementById("requestChemicalModal"));
         modal.show();
     }
 
     async function submitChemicalRequest() {
         const form = document.getElementById("requestChemicalForm");
+        const neededDate = document.getElementById("requestNeededDate").value;
 
         if (!form.checkValidity()) {
             form.reportValidity();
@@ -2005,6 +2048,7 @@
                     chemicalBatchId: Number(batchId),
                     requestedQuantity: requestedQuantity,
                     purpose: purpose,
+                    neededDate: neededDate,
                     comment: usageLocation
                         ? (comment ? `Lokacija korišćenja: ${usageLocation}; ${comment}` : `Lokacija korišćenja: ${usageLocation}`)
                         : comment

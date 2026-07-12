@@ -52,6 +52,7 @@ public class RequestService {
                                               BigDecimal requestedQuantity,
                                               String purpose,
                                               String comment,
+                                              LocalDate neededDate,
                                               String userEmail) {
 
         User user = userRepository.findByEmail(userEmail)
@@ -65,6 +66,7 @@ public class RequestService {
         request.setRequestedQuantity(requestedQuantity);
         request.setPurpose(purpose);
         request.setComment(comment);
+        request.setNeededDate(neededDate);
         request.setEmail(user.getEmail());
         request.setFullName(user.getFirstName() + " " + user.getLastName());
 
