@@ -492,7 +492,7 @@
                                 desc: `Hemikaliji je <strong>istekao rok trajanja</strong> pre ${Math.abs(daysToExpiry)} dana!`,
                                 status: '<span class="status status-open">Za otpis</span>'
                             });
-                        } else if (daysToExpiry <= 30) {
+                        } else if (daysToExpiry <= 180) {
                             countHigh++;
                             allAlerts.push({
                                 type: 'high',

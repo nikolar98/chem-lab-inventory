@@ -1,5 +1,6 @@
 package uns.ac.rs.chemlabinventory.service;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uns.ac.rs.chemlabinventory.dto.AlertStatsDTO;
 import uns.ac.rs.chemlabinventory.dto.ChemicalBatchDTO;
@@ -8,6 +9,8 @@ import uns.ac.rs.chemlabinventory.repository.ChemicalBatchRepository;
 import uns.ac.rs.chemlabinventory.repository.ConsumptionRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -15,13 +18,16 @@ public class ChemicalBatchService {
 
     private final ChemicalBatchRepository chemicalBatchRepository;
     private final ConsumptionRepository consumptionRepository;
+    private final EmailService emailService;
 
     public ChemicalBatchService(
             ChemicalBatchRepository chemicalBatchRepository,
-            ConsumptionRepository consumptionRepository
+            ConsumptionRepository consumptionRepository,
+            EmailService emailService
     ) {
         this.chemicalBatchRepository = chemicalBatchRepository;
         this.consumptionRepository = consumptionRepository;
+        this.emailService = emailService;
     }
 
     public ChemicalBatch findById(Long id) {
@@ -52,14 +58,40 @@ public class ChemicalBatchService {
         batch.setCurrentQuantity(newQuantity);
         batch.setNote(note);
 
-        if (oldQuantity != null
-                && newQuantity != null
-                && newQuantity.compareTo(oldQuantity) < 0) {
+        if (oldQuantity != null && newQuantity != null && newQuantity.compareTo(oldQuantity) < 0) {
             batch.setOpened(true);
         }
 
-        return chemicalBatchRepository.save(batch);
+        ChemicalBatch savedBatch = chemicalBatchRepository.save(batch);
+
+        if (savedBatch.getMinimumQuantityAlarm() != null) {
+            boolean wasAboveMinimum = oldQuantity == null || oldQuantity.compareTo(savedBatch.getMinimumQuantityAlarm()) > 0;
+            boolean isNowBelowMinimum = newQuantity != null && newQuantity.compareTo(savedBatch.getMinimumQuantityAlarm()) <= 0;
+
+            if (wasAboveMinimum && isNowBelowMinimum) {
+                emailService.sendCriticalQuantityAlert(savedBatch);
+            }
+        }
+
+        return savedBatch;
     }
+
+    @Scheduled(cron = "0 0 8 * * ?")
+    public void checkExpirationsDaily() {
+        List<ChemicalBatch> allBatches = chemicalBatchRepository.findAll();
+        LocalDate today = LocalDate.now();
+
+        for (ChemicalBatch batch : allBatches) {
+            if (batch.getExpirationDate() != null) {
+                long daysBetween = ChronoUnit.DAYS.between(today, batch.getExpirationDate());
+
+                if (daysBetween == 180 || daysBetween == 0) {
+                    emailService.sendExpirationAlert(batch, daysBetween);
+                }
+            }
+        }
+    }
+
 
     private ChemicalBatchDTO toDto(ChemicalBatch batch) {
         ChemicalBatchDTO dto = new ChemicalBatchDTO();
