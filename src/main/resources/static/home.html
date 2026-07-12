@@ -196,6 +196,14 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
 
         .card h3 {
@@ -382,7 +390,7 @@
 
                 <div class="stat-card">
                     <h2 id="totalConsumptions">0</h2>
-                    <span>Evidencija potrošnje (L/KG)</span>
+                    <span>Ukupna potrošnja (L/KG)</span>
                 </div>
 
                 <div class="stat-card">
@@ -432,7 +440,7 @@
             <div class="card warning-blue">
                 <div style="display:flex; align-items:center; gap:18px;">
                     <div style="width:60px; height:60px; border-radius:50%; background:#e8f4fd; color:#0dcaf0; display:flex; align-items:center; justify-content:center; font-size:28px;">
-                        <i class="bi bi-box2-open"></i>
+                        <i class="bi bi-box-seam"></i>
                     </div>
                     <div>
                         <h2 style="margin:0; font-size:24px;">Otvorena pakovanja</h2>
@@ -567,7 +575,13 @@
             fetch("/api/consumptions")
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById("totalConsumptions").textContent = data.length;
+
+                    const totalConsumption = data.reduce((sum, consumption) => {
+                        return sum + Number(consumption.quantity || 0);
+                    }, 0);
+
+                    document.getElementById("totalConsumptions").textContent =
+                        totalConsumption.toFixed(2).replace(/\.00$/, "");
                 })
                 .catch(error => console.error(error));
 

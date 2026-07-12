@@ -158,6 +158,11 @@
             font-size: 28px;
         }
 
+        .summary-icon.medium {
+            background: #e8f4fd;
+            color: #0dcaf0;
+        }
+
         .critical {
             background: #ffe8e8;
             color: #dc3545;
@@ -349,7 +354,7 @@
 
             <div class="col-md-3">
                 <div class="alert-summary filter-card" id="card-medium" onclick="setFilter('medium', this)">
-                    <div class="summary-icon medium"><i class="bi bi-box2-open"></i></div>
+                    <div class="summary-icon medium"><i class="bi bi-box-seam "></i></div>
                     <div>
                         <h2 id="alertOpenedCount" class="mb-0 text-info">0</h2>
                         <strong>Otvorena pakovanja</strong><br>
@@ -497,7 +502,7 @@
                             allAlerts.push({
                                 type: 'high',
                                 batch: batch,
-                                icon: '<i class="bi bi-calendar-event-fill text-warning fs-5"></i>',
+                                icon: '<i class="bi bi-calendar-event text-warning fs-5"></i>',
                                 priority: '<span class="priority priority-high" style="background:#fff0e2; color:#fd7e14;">Visok prioritet</span>',
                                 desc: `Rok trajanja ističe za <strong>${daysToExpiry} dana</strong> (${formatDate(batch.expirationDate)}).`,
                                 status: '<span class="status status-progress" style="background:#fff0e2; color:#fd7e14;">Preporučen utrošak</span>'
@@ -510,7 +515,7 @@
                         allAlerts.push({
                             type: 'critical',
                             batch: batch,
-                            icon: '<i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>',
+                            icon: '<i class="bi bi-exclamation-triangle text-danger fs-5"></i>',
                             priority: '<span class="priority priority-critical">Kritična količina</span>',
                             desc: `Zalihe su ispod minimuma! <strong class="text-danger">Trenutno: ${currentQty.toFixed(2).replace(/\.00$/, '')} ${unit}</strong> <span class="text-muted">(Alarm: ${minAlarm})</span>`,
                             status: '<span class="status status-open">Potrebna nabavka</span>'
@@ -522,7 +527,7 @@
                         allAlerts.push({
                             type: 'medium',
                             batch: batch,
-                            icon: '<i class="bi bi-box2-open-fill text-info fs-5"></i>',
+                            icon: '<i class="bi bi-box-seam" style="color:#0dcaf0;"></i>',
                             priority: '<span class="priority priority-medium" style="background:#e8f4fd; color:#0dcaf0;">Otvoreno pakovanje</span>',
                             desc: `Ovo pakovanje je zavedeno kao otvoreno. Preostalo: <strong>${currentQty.toFixed(2).replace(/\.00$/, '')} ${unit}</strong>.`,
                             status: '<span class="status status-progress" style="background:#e8f4fd; color:#0dcaf0;">U upotrebi</span>'
@@ -534,7 +539,7 @@
                         allAlerts.push({
                             type: 'info',
                             batch: batch,
-                            icon: '<i class="bi bi-chat-text-fill text-primary fs-5"></i>',
+                            icon: '<i class="bi bi-info-circle text-primary fs-5"></i>',
                             priority: '<span class="priority priority-info" style="background:#e8f2ff; color:#0d6efd;">Informativno</span>',
                             desc: `<strong>Zabeležena napomena:</strong> ${batch.note}`,
                             status: '<span class="status status-done" style="background:#e8f2ff; color:#0d6efd;">Zabeleženo</span>'
