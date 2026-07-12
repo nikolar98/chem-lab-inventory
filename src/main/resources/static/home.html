@@ -371,25 +371,26 @@
 
             <div class="stats">
                 <div class="stat-card">
-                    <h2>128</h2>
+                    <h2 id="totalChemicals">0</h2>
                     <span>Ukupno hemikalija</span>
                 </div>
 
                 <div class="stat-card">
-                    <h2>256</h2>
+                    <h2 id="totalPackages">0</h2>
                     <span>Ukupno pakovanja</span>
                 </div>
 
                 <div class="stat-card">
-                    <h2>842</h2>
-                    <span>Evidencija potrošnje</span>
+                    <h2 id="totalConsumptions">0</h2>
+                    <span>Evidencija potrošnje (L/KG)</span>
                 </div>
 
                 <div class="stat-card">
-                    <h2>12</h2>
+                    <h2 id="totalLocations">0</h2>
                     <span>Ukupno lokacija</span>
                 </div>
             </div>
+
         </div>
 
         <h3 class="section-title">Upozorenja</h3>
@@ -460,6 +461,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         loadAlertSummary();
         loadUserInfo();
+        loadDashboardStats();
     });
 
     fetch("/api/current-user")
@@ -545,6 +547,31 @@
                 .catch(error => console.error("Greška pri učitavanju statistike:", error));
         }
 
+        function loadDashboardStats() {
+
+            fetch("/api/chemical-batches")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("totalChemicals").textContent = data.length;
+
+                    const totalPackages = data.reduce((sum, batch) => sum + batch.purchasedQuantity, 0);
+                    document.getElementById("totalPackages").textContent = totalPackages;
+
+                    const uniqueLocations = new Set(
+                        data.map(batch => batch.locationName)
+                    );
+                    document.getElementById("totalLocations").textContent = uniqueLocations.size;
+                })
+                .catch(error => console.error(error));
+
+            fetch("/api/consumptions")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("totalConsumptions").textContent = data.length;
+                })
+                .catch(error => console.error(error));
+
+        }
 
 
 
