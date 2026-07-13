@@ -27,7 +27,7 @@ public class ReportController {
         return ResponseEntity.ok()
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=chemical_cost_report.pdf"
+                        "attachment; filename=chemical_cost_report.pdf"
                 )
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
@@ -50,7 +50,7 @@ public class ReportController {
         );
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=custom_chemical_report.pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Izvestaj_o_hemikalijama.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }

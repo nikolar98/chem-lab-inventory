@@ -2,7 +2,9 @@ package uns.ac.rs.chemlabinventory.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uns.ac.rs.chemlabinventory.model.User;
+import uns.ac.rs.chemlabinventory.repository.ConsumptionRepository;
 import uns.ac.rs.chemlabinventory.repository.UserRepository;
 
 import java.util.List;
@@ -12,10 +14,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ConsumptionRepository consumptionRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ConsumptionRepository consumptionRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.consumptionRepository = consumptionRepository;
     }
 
     public List<User> findAll() {
@@ -53,5 +57,15 @@ public class UserService {
         userRepository.updateUserActivity(id, requestedActive);
         user.setActive(requestedActive);
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("Korisnik ne postoji.");
+        }
+
+        consumptionRepository.deleteByUserId(id);
+        userRepository.deleteById(id);
     }
 }
