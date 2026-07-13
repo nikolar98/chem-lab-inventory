@@ -453,7 +453,9 @@
                     jsPDF: {unit: 'in', format: 'a4', orientation: 'portrait'}
                 };
 
-                html2pdf().set(opt).from(html).save();
+                html2pdf().set(opt).from(html).output('bloburl').then(function(pdfUrl) {
+                    window.open(pdfUrl, '_blank');
+                });
             })
             .catch(err => {
                 console.error(err);
