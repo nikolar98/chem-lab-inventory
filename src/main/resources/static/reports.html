@@ -285,9 +285,11 @@
                                 </div>
 
                                 <div id="specificChemicalsWrapper" style="display: none;">
-                                    <select id="chemicalSelect" name="chemicalIds" class="form-select bg-light border-0" multiple size="8" style="font-size: 16px; padding: 10px; height: 250px;">
-                                    </select>
-                                    <div class="form-text text-muted mt-2" style="font-size: 12px;">Držite Ctrl (ili Cmd) za izbor više stavki.</div>
+                                    <div id="chemicalCheckboxes" class="bg-light border rounded p-3" style="height: 250px; overflow-y: auto;">
+                                    </div>
+                                    <div id="errorNoChemicals" class="text-danger fw-bold mt-2" style="display: none; font-size: 14px;">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> Morate izabrati barem jednu hemikaliju.
+                                    </div>
                                 </div>
                             </div>
 
@@ -400,45 +402,52 @@
         });
 
     document.addEventListener("DOMContentLoaded", function() {
-        const chemicalSelect = document.getElementById("chemicalSelect");
-
         fetch("/api/chemicals")
             .then(response => {
                 if (!response.ok) throw new Error("Greška pri čitanju hemikalija");
                 return response.json();
             })
             .then(chemicals => {
-                chemicalSelect.innerHTML = "";
+                const container = document.getElementById("chemicalCheckboxes");
+                container.innerHTML = "";
+
                 chemicals.forEach(chemical => {
-                    const option = document.createElement("option");
-                    option.value = chemical.id;
-                    option.textContent = chemical.name;
-                    chemicalSelect.appendChild(option);
+                    const div = document.createElement("div");
+                    div.className = "form-check mb-2";
+
+                    const input = document.createElement("input");
+                    input.type = "checkbox";
+                    input.className = "form-check-input chemical-cb";
+                    input.value = chemical.id;
+                    input.id = "chem_" + chemical.id;
+                    input.style.transform = "scale(1.15)";
+
+                    const label = document.createElement("label");
+                    label.className = "form-check-label ms-2";
+                    label.htmlFor = "chem_" + chemical.id;
+                    label.style.fontSize = "16px";
+                    label.textContent = chemical.name;
+
+                    div.appendChild(input);
+                    div.appendChild(label);
+                    container.appendChild(div);
                 });
             })
             .catch(error => {
                 console.error("Greška:", error);
-                chemicalSelect.innerHTML = `<option disabled>Neuspešno učitavanje hemikalija</option>`;
+                document.getElementById("chemicalCheckboxes").innerHTML = `<span class="text-danger fw-bold">Neuspešno učitavanje hemikalija</span>`;
             });
     });
 
     function toggleChemicalSelect(show) {
         const wrapper = document.getElementById("specificChemicalsWrapper");
-        const select = document.getElementById("chemicalSelect");
         wrapper.style.display = show ? "block" : "none";
-
-        if (show) {
-            select.setAttribute("required", "required");
-        } else {
-            select.removeAttribute("required");
-        }
     }
 
     document.getElementById("customReportForm").addEventListener("submit", function(event) {
         event.preventDefault();
 
         const checkboxes = document.querySelectorAll(".column-checkbox");
-
         const fromDateInput = document.querySelector('input[name="fromDate"]');
         const toDateInput = document.querySelector('input[name="toDate"]');
 
@@ -447,6 +456,11 @@
 
         errorNoColumns.style.display = "none";
         errorInvalidDates.style.display = "none";
+        const errorNoChemicals = document.getElementById("errorNoChemicals");
+
+        errorNoColumns.style.display = "none";
+        errorInvalidDates.style.display = "none";
+        errorNoChemicals.style.display = "none";
 
         let hasError = false;
 
@@ -466,6 +480,19 @@
             }
         }
 
+        const scopeSpecific = document.getElementById("scopeSpecific").checked;
+        let selectedChemicalIds = [];
+
+        if (scopeSpecific) {
+            const checkedChems = document.querySelectorAll(".chemical-cb:checked");
+            if (checkedChems.length === 0) {
+                errorNoChemicals.style.display = "block";
+                hasError = true;
+            } else {
+                selectedChemicalIds = Array.from(checkedChems).map(cb => cb.value);
+            }
+        }
+
         if (hasError) {
             return;
         }
@@ -478,14 +505,8 @@
 
         let url = `/api/reports/custom?fromDate=${fromDate}&toDate=${toDate}&includePotrosnja=${includePotrosnja}&includeStanje=${includeStanje}&includeCena=${includeCena}`;
 
-        const scopeSpecific = document.getElementById("scopeSpecific").checked;
-        if (scopeSpecific) {
-            const chemicalSelect = document.getElementById("chemicalSelect");
-            const selectedIds = Array.from(chemicalSelect.selectedOptions).map(opt => opt.value);
-
-            if (selectedIds.length > 0) {
-                url += `&chemicalIds=${selectedIds.join(',')}`;
-            }
+        if (scopeSpecific && selectedChemicalIds.length > 0) {
+            url += `&chemicalIds=${selectedChemicalIds.join(',')}`;
         }
 
         window.open(url, '_blank');
