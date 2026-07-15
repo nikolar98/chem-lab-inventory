@@ -159,7 +159,7 @@
         }
 
         .table th {
-            font-weight: 600;
+            font-weight: 700;
             text-align: center;
             vertical-align: middle;
             white-space: nowrap;
@@ -251,20 +251,105 @@
             height: calc(100vh - 390px);
             min-height: 360px;
             overflow: auto;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #dfe7eb;
             border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 14px rgba(32, 58, 67, 0.05);
+        }
+
+        .table-scroll-container {
+            height: calc(100vh - 390px);
+            min-height: 360px;
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid #dfe7eb;
+            border-radius: 12px;
+            background: white;
         }
 
         .table-scroll-container .table {
-            min-width: 1700px;
+            width: 100%;
             margin-bottom: 0;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
-        .table-scroll-container thead th {
+        .table-scroll-container th {
             position: sticky;
             top: 0;
-            background: white;
             z-index: 5;
+            background: linear-gradient(180deg, #f8fbfc 0%, #edf4f6 100%);
+            color: #203a43;
+            border-bottom: 2px solid #008b95;
+            border-right: 1px solid #dfe7eb;
+            box-shadow: 0 2px 5px rgba(32, 58, 67, 0.06);
+        }
+
+        .table-scroll-container th:last-child {
+            border-right: none;
+        }
+
+        .table-scroll-container th,
+        .table-scroll-container td {
+            padding: 11px 8px;
+            font-size: 0.88rem;
+            vertical-align: middle;
+        }
+
+        .table-scroll-container td {
+            color: #344b55;
+            border-bottom: 1px solid #e8eef1;
+            border-right: 1px solid #edf1f3;
+            background: white;
+        }
+
+        .table-scroll-container td:last-child {
+            border-right: none;
+        }
+
+        .table-scroll-container tbody tr:nth-child(even) td {
+            background: #f9fbfc;
+        }
+
+        .table-scroll-container tbody tr:hover td {
+            background: #edf8f9;
+        }
+
+        .table-scroll-container tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-scroll-container td strong {
+            color: #008b95;
+            font-weight: 700;
+        }
+
+        #summaryView table {
+            width: 100%;
+            min-width: 0;
+            table-layout: fixed;
+        }
+
+        #detailsView table,
+        #openedView table,
+        #pricesView table {
+            width: 100%;
+            min-width: 0;
+        }
+
+        @media (max-width: 1450px) {
+            #detailsView table {
+                min-width: 1100px;
+            }
+
+            #openedView table {
+                min-width: 1150px;
+            }
+
+            #pricesView table {
+                min-width: 1350px;
+            }
         }
 
         .table-scroll-container::-webkit-scrollbar {
@@ -273,12 +358,12 @@
         }
 
         .table-scroll-container::-webkit-scrollbar-thumb {
-            background: #b0bec5;
+            background: #9aadb4;
             border-radius: 10px;
         }
 
         .table-scroll-container::-webkit-scrollbar-thumb:hover {
-            background: #78909c;
+            background: #657f88;
         }
 
         .table-scroll-container::-webkit-scrollbar-track {
@@ -463,6 +548,13 @@
                         <option value="all">Sve</option>
                     </select>
                 </div>
+
+                <h4 id="tableViewTitle"
+                    class="mb-0 fw-bold text-center flex-grow-1 d-none"
+                    style="color:#203a43;">
+                </h4>
+
+                <div style="width:95px;"></div>
             </div>
 
             <div class="table-scroll-container" id="summaryView">
@@ -1254,6 +1346,8 @@
 
         document.getElementById("locationTabsBlock").style.display = currentView === "details" || currentView === "opened" || currentView === "prices" ? "flex" : "none";
 
+        const tableViewTitle = document.getElementById("tableViewTitle");
+
         if (currentView === "summary") {
             document.getElementById("summaryView").classList.remove("d-none");
             const summaryDescription = document.getElementById("summaryDescription");
@@ -1261,6 +1355,7 @@
             if (summaryDescription) {
                 summaryDescription.style.display = "block";
             }
+            tableViewTitle.classList.add("d-none");
         } else if (currentView === "details") {
             document.getElementById("detailsView").classList.remove("d-none");
             const summaryDescription = document.getElementById("summaryDescription");
@@ -1268,6 +1363,8 @@
             if (summaryDescription) {
                 summaryDescription.style.display = "none";
             }
+            tableViewTitle.textContent = "Detaljna evidencija";
+            tableViewTitle.classList.remove("d-none");
 
         } else if (currentView === "opened") {
             document.getElementById("openedView").classList.remove("d-none");
@@ -1276,6 +1373,8 @@
             if (summaryDescription) {
                 summaryDescription.style.display = "none";
             }
+            tableViewTitle.textContent = "Otvorene hemikalije";
+            tableViewTitle.classList.remove("d-none");
         } else if (currentView === "prices") {
             document.getElementById("pricesView").classList.remove("d-none");
             const summaryDescription = document.getElementById("summaryDescription");
@@ -1283,6 +1382,8 @@
             if (summaryDescription) {
                 summaryDescription.style.display = "none";
             }
+            tableViewTitle.textContent = "Evidencija cena";
+            tableViewTitle.classList.remove("d-none");
         }
     }
 
@@ -2261,6 +2362,12 @@
             if (!batchResponse.ok) throw new Error("Greška pri upisu zalihe u magacin.");
 
             bootstrap.Modal.getInstance(document.getElementById('addChemicalModal')).hide();
+
+            currentView = "details";
+            document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+            document.querySelector('.view-tab[data-view="details"]').classList.add("active");
+            showCurrentView();
+
             loadChemicalBatches();
             alert("Hemikalija uspešno dodata na stanje!");
 
