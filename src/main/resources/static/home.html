@@ -336,7 +336,7 @@
     </div>
 
     <div class="subtitle">
-        Sistem za evidenciju hemikalija i zaliha
+        Sistem za evidenciju hemikalija
     </div>
 
     <nav class="sidebar-nav">
@@ -373,8 +373,7 @@
             <h1>Dobrodošli u sistem<br>Hemijska laboratorija</h1>
 
             <p>
-                Sistem za evidenciju hemikalija, laboratorijskih zaliha,
-                praćenje potrošnje, lokacija, pakovanja i stanja na lageru.
+                Sistem za evidenciju hemikalija, praćenje potrošnje, lokacija, pakovanja i stanja na lageru.
             </p>
 
             <div class="stats">
@@ -544,13 +543,13 @@
                     document.getElementById("homeOpenedCount").textContent = `${data.opened}`;
 
                     document.getElementById("homeCriticalText").textContent =
-                        data.critical === 0 ? "Sve količine i rokovi su stabilni." : `${data.critical} pakovanja je palo ispod minimuma ili im je istekao rok.`;
+                        data.critical === 0 ? "Sve količine i rokovi su stabilni." : `${data.critical} pakovanja je palo ispod minimuma ili im je istekao rok`;
 
                     document.getElementById("homeHighText").textContent =
-                        data.expiring === 0 ? "Nema hemikalija koje ističu uskoro." : `${data.expiring} hemikalija ističe u narednih 30 dana.`;
+                        data.expiring === 0 ? "Nema hemikalija koje ističu uskoro." : `${data.expiring} hemikalija ističe u narednih 6 meseci`;
 
                     document.getElementById("homeOpenedText").textContent =
-                        data.opened === 0 ? "Trenutno nema evidentiranih otvorenih pakovanja." : `Evidentirano je ${data.opened} pakovanja koja su trenutno u upotrebi.`;
+                        data.opened === 0 ? "Trenutno nema evidentiranih otvorenih pakovanja." : `Evidentirano je ${data.opened} pakovanja koja su trenutno u upotrebi`;
                 })
                 .catch(error => console.error("Greška pri učitavanju statistike:", error));
         }
