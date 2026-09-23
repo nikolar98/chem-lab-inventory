@@ -465,8 +465,15 @@
             options: { indexAxis: "y", responsive: true, maintainAspectRatio: false }
         });
 
-        const monthLabels = Object.keys(monthlyUsage);
-        const monthData = Object.values(monthlyUsage);
+        const sortedMonths = Object.entries(monthlyUsage).sort((a, b) => {
+            const [monthA, yearA] = a[0].split(".").map(Number);
+            const [monthB, yearB] = b[0].split(".").map(Number);
+
+            return yearA - yearB || monthA - monthB;
+        });
+
+        const monthLabels = sortedMonths.map(item => item[0]);
+        const monthData = sortedMonths.map(item => item[1]);
 
         if (monthlyChartInstance) monthlyChartInstance.destroy();
         monthlyChartInstance = new Chart(document.getElementById("monthlyChart"), {
