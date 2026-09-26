@@ -367,7 +367,7 @@
             const chemName = c.chemicalName || (c.chemicalBatch && c.chemicalBatch.chemical ? c.chemicalBatch.chemical.name : "Nepoznato");
             const purity = c.purity || (c.chemicalBatch ? c.chemicalBatch.purity : "—");
             const qty = `${c.quantity || 0} ${c.unit || ""}`;
-            const user = c.userName || (c.user ? `${c.user.firstName} ${c.user.lastName}` : "Nepoznato");
+            const user = c.userFullName || "Nepoznato";
             const loc = c.locationName || (c.chemicalBatch && c.chemicalBatch.location ? c.chemicalBatch.location.name : "—");
             const purpose = c.purpose || "—";
 
