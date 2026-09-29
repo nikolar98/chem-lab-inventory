@@ -309,6 +309,7 @@
                         <th>Hemikalija</th>
                         <th>Tražena količina</th>
                         <th>Svrha</th>
+                        <th>Lokacija</th>
                         <th>Vreme slanja zahteva</th>
                         <th>Napomena</th>
                         <th>Potrebno za</th>
@@ -481,7 +482,7 @@
             })
             .catch(error => {
                 console.error(error);
-                document.getElementById("chemicalRequestsTableBody").innerHTML = emptyRow(7, "Greška pri učitavanju zahteva.");
+                document.getElementById("chemicalRequestsTableBody").innerHTML = emptyRow(9, "Greška pri učitavanju zahteva.");
                 document.getElementById("accountRequestsTableBody").innerHTML = emptyRow(5, "Greška pri učitavanju zahteva.");
             });
     }
@@ -503,7 +504,7 @@
         tbody.innerHTML = "";
 
         if (requests.length === 0) {
-            tbody.innerHTML = emptyRow(7, "Trenutno nema zahteva za korišćenje hemikalija.");
+            tbody.innerHTML = emptyRow(9, "Trenutno nema zahteva za korišćenje hemikalija.");
             return;
         }
 
@@ -513,6 +514,18 @@
             const unit = batch && batch.packageUnit ? normalizeUnit(batch.packageUnit) : "";
             const chemicalName = batch ? batch.chemicalName : `Zaliha ID: ${request.chemicalBatchId || "—"}`;
             const neededDate = request.neededDate ? formatDateOnly(request.neededDate) : "—";
+
+            const location = batch && batch.locationName ? batch.locationName : "—";
+
+            let cleanComment = request.comment || "—";
+
+            if (request.comment && request.comment.startsWith("Lokacija korišćenja:")) {
+                const separatorIndex = request.comment.indexOf(";");
+
+                cleanComment = separatorIndex !== -1
+                    ? request.comment.substring(separatorIndex + 1).trim()
+                    : "—";
+            }
 
             tbody.innerHTML += `
                 <tr>
@@ -529,9 +542,11 @@
 
                     <td>${request.purpose || "—"}</td>
 
+                    <td>${location}</td>
+
                     <td>${createdAt}</td>
 
-                    <td class="note-cell">${request.comment || "—"}</td>
+                    <td class="note-cell">${cleanComment}</td>
 
                     <td>${neededDate}</td>
 
