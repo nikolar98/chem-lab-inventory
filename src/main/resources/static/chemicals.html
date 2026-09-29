@@ -1306,38 +1306,6 @@
         });
     }
 
-    function renderPricesTable(batches) {
-        const tbody = document.getElementById("pricesTableBody");
-        tbody.innerHTML = "";
-
-        batches.forEach(batch => {
-            const locationName = normalizeLocation(batch.locationName);
-            const responsible = getResponsiblePerson(batch);
-            const purchasedQuantity = Number(batch.purchasedQuantity || 0);
-            const packagePrice = Number(batch.packagePrice ?? batch.price ?? 0);
-            const totalPriceFromDb = Number(batch.totalPrice ?? 0);
-            const totalPrice = totalPriceFromDb > 0
-                ? totalPriceFromDb
-                : (packagePrice > 0 && purchasedQuantity > 0 ? packagePrice * purchasedQuantity : 0);
-
-            tbody.innerHTML += `
-                <tr data-location="${locationName}" data-status="${getStatus(batch)}">
-                    <td>${valueOrDash(batch.chemicalName)}</td>
-                    <td>${valueOrDash(batch.manufacturerName)}</td>
-                    <td>${valueOrDash(batch.purity)}</td>
-                    <td>${formatNumber(batch.packageSize)} ${normalizeUnit(batch.packageUnit)}</td>
-                    <td>${valueOrDash(batch.purchasedQuantity)}</td>
-                    <td><strong>${formatNumber(batch.totalQuantity)} ${normalizeUnit(batch.packageUnit)}</strong></td>
-                    <td>${locationName}</td>
-                    <td>${responsible}</td>
-                    <td>${packagePrice > 0 ? formatCurrency(packagePrice) : "—"}</td>
-                    <td><strong>${totalPrice > 0 ? formatCurrency(totalPrice) : "—"}</strong></td>
-                    <td>${formatNote(batch.note)}</td>
-                </tr>
-            `;
-        });
-    }
-
     function showCurrentView() {
         document.getElementById("summaryView").classList.add("d-none");
         document.getElementById("detailsView").classList.add("d-none");
