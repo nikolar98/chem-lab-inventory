@@ -538,6 +538,7 @@
                 <input type="text" id="searchInput" class="form-control" placeholder="Pretraga...">
             </div>
 
+
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="d-flex align-items-center gap-2">
                     <span>Prikaži:</span>
@@ -554,7 +555,11 @@
                     style="color:#203a43;">
                 </h4>
 
-                <div style="width:95px;"></div>
+                <button type="button" id="resetFiltersBtn"
+                        class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Resetuj filtere
+                </button>
             </div>
 
             <div class="table-scroll-container" id="summaryView">
@@ -1104,6 +1109,7 @@
             });
     }
 
+
     function setupEvents() {
         document.querySelectorAll(".view-tab").forEach(tab => {
             tab.addEventListener("click", () => {
@@ -1137,7 +1143,20 @@
             currentPage = 1;
             applyFilters();
         });
+
+        document.getElementById("resetFiltersBtn").addEventListener("click", () => {
+            searchInput.value = "";
+            selectedLocation = "all";
+            currentPage = 1;
+
+            document.querySelectorAll(".location-tab").forEach(tab => {
+                tab.classList.toggle("active", tab.dataset.location === "all");
+            });
+
+            applyFilters();
+        });
     }
+
 
     function renderAllTables() {
         const allBatchesSorted = [...allBatches].sort((a, b) => Number(b.id) - Number(a.id));
