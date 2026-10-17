@@ -1144,17 +1144,37 @@
             applyFilters();
         });
 
+
         document.getElementById("resetFiltersBtn").addEventListener("click", () => {
             searchInput.value = "";
-            selectedLocation = "all";
-            currentPage = 1;
 
+            selectedLocation = "all";
             document.querySelectorAll(".location-tab").forEach(tab => {
                 tab.classList.toggle("active", tab.dataset.location === "all");
             });
 
+            rowsPerPage = 10;
+            rowsPerPageSelect.value = "10";
+
+            currentPage = 1;
+
+            currentView = "summary";
+            document.querySelectorAll(".view-tab").forEach(tab => {
+                tab.classList.toggle("active", tab.dataset.view === "summary");
+            });
+
+            sortDirections = {};
+            document.querySelectorAll(".sortable").forEach(th => {
+                th.classList.remove("active-sort");
+            });
+
+
+            renderAllTables();
+
+            showCurrentView();
             applyFilters();
         });
+
     }
 
 
